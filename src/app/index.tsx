@@ -1,36 +1,70 @@
 import * as React from "react";
 import {
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
 } from "react-native";
-import { Card, SegmentedButtons } from "react-native-paper";
+import { Card, SegmentedButtons, useTheme } from "react-native-paper";
 import AnnounceForm from "../components/AnnounceForm";
 import CalculateForm from "../components/CalculateForm";
+import CallToActionSection from "../components/CallToActionSection";
+import FunnelSection from "../components/FunnelSection";
+import HeroCarousel, { HeroSlide } from "../components/HeroCarousel";
+import InfoSlides from "../components/InfoSlides";
 import PropertyForm from "../components/PropertyForm";
 
 export default function HomeScreen() {
+  const theme = useTheme(); // access Paper theme colors
+
   const [mode, setMode] = React.useState<"search" | "announce">("search");
   const [subMode, setSubMode] = React.useState<
     "rent" | "buy" | "announce" | "calculate"
   >("rent");
 
+  const slides: HeroSlide[] = [
+    {
+      title: "Modern House",
+      description: "Discover spacious family homes with outdoor living.",
+      image:
+        "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=80",
+      cta: "Explore Houses",
+      onPress: () => setMode("search"),
+    },
+    {
+      title: "City Apartment",
+      description: "Stylish apartments in vibrant urban areas.",
+      image:
+        "https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=1200&q=80",
+      cta: "Browse Apartments",
+      onPress: () => setMode("search"),
+    },
+    {
+      title: "Open Terrain",
+      description: "Invest in land and build your future.",
+      image:
+        "https://images.unsplash.com/photo-1594220862488-117b78382514?auto=format&fit=crop&w=1200&q=80",
+      cta: "View Terrains",
+      onPress: () => setMode("search"),
+    },
+  ];
+
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[
+          styles.container,
+          { backgroundColor: theme.colors.background },
+        ]}
         keyboardShouldPersistTaps="handled"
       >
-        <Image
-          source={{ uri: "https://placehold.co/600x200?text=Real+Estate+Hero" }}
-          style={styles.hero}
-        />
+        {/* Hero carousel */}
+        <HeroCarousel slides={slides} />
 
+        {/* Mode toggle */}
         <SegmentedButtons
           value={mode}
           onValueChange={setMode}
@@ -41,11 +75,13 @@ export default function HomeScreen() {
           style={{ marginVertical: 8 }}
         />
 
-        <Card style={{ marginTop: 16 }}>
+        {/* Card with sub-mode */}
+        <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
           <Card.Title
             title={
               mode === "search" ? "Search Properties" : "Announce Property"
             }
+            titleStyle={{ color: theme.colors.onSurface }}
           />
           <Card.Content>
             {mode === "search" ? (
@@ -54,8 +90,8 @@ export default function HomeScreen() {
                   value={subMode}
                   onValueChange={(val) => setSubMode(val as "rent" | "buy")}
                   buttons={[
-                    { value: "rent", label: "Rent", icon: "key" },
-                    { value: "buy", label: "Buy", icon: "cash" },
+                    { value: "rent", label: "Rent", icon: "key-outline" },
+                    { value: "buy", label: "Buy", icon: "cash-multiple" },
                   ]}
                   style={{ marginVertical: 8 }}
                 />
@@ -83,6 +119,11 @@ export default function HomeScreen() {
             )}
           </Card.Content>
         </Card>
+
+        {/* New sections AFTER the form */}
+        <CallToActionSection />
+        <InfoSlides />
+        <FunnelSection />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -90,5 +131,5 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, padding: 16 },
-  hero: { width: "100%", height: 200, marginBottom: 16 },
+  card: { marginTop: 16 },
 });

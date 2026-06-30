@@ -72,7 +72,7 @@ export default function Layout() {
                     : route.name === "about"
                       ? "information-outline"
                       : route.name === "rent"
-                        ? "key"
+                        ? "key-outline"
                         : route.name === "buy"
                           ? "cash-multiple"
                           : "circle";
