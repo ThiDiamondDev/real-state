@@ -1,98 +1,94 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import * as React from "react";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { Card, SegmentedButtons } from "react-native-paper";
+import AnnounceForm from "../components/AnnounceForm";
+import CalculateForm from "../components/CalculateForm";
+import PropertyForm from "../components/PropertyForm";
 
 export default function HomeScreen() {
+  const [mode, setMode] = React.useState<"search" | "announce">("search");
+  const [subMode, setSubMode] = React.useState<
+    "rent" | "buy" | "announce" | "calculate"
+  >("rent");
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Image
+          source={{ uri: "https://placehold.co/600x200?text=Real+Estate+Hero" }}
+          style={styles.hero}
+        />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <SegmentedButtons
+          value={mode}
+          onValueChange={setMode}
+          buttons={[
+            { value: "search", label: "Search Property", icon: "magnify" },
+            { value: "announce", label: "Announce Property", icon: "bullhorn" },
+          ]}
+          style={{ marginVertical: 8 }}
+        />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+        <Card style={{ marginTop: 16 }}>
+          <Card.Title
+            title={
+              mode === "search" ? "Search Properties" : "Announce Property"
+            }
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          <Card.Content>
+            {mode === "search" ? (
+              <>
+                <SegmentedButtons
+                  value={subMode}
+                  onValueChange={(val) => setSubMode(val as "rent" | "buy")}
+                  buttons={[
+                    { value: "rent", label: "Rent", icon: "key" },
+                    { value: "buy", label: "Buy", icon: "cash" },
+                  ]}
+                  style={{ marginVertical: 8 }}
+                />
+                <PropertyForm type={subMode as "rent" | "buy"} />
+              </>
+            ) : (
+              <>
+                <SegmentedButtons
+                  value={subMode}
+                  onValueChange={(val) =>
+                    setSubMode(val as "announce" | "calculate")
+                  }
+                  buttons={[
+                    { value: "announce", label: "Announce", icon: "bullhorn" },
+                    {
+                      value: "calculate",
+                      label: "Calculate",
+                      icon: "calculator",
+                    },
+                  ]}
+                  style={{ marginVertical: 8 }}
+                />
+                {subMode === "announce" ? <AnnounceForm /> : <CalculateForm />}
+              </>
+            )}
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  container: { flexGrow: 1, padding: 16 },
+  hero: { width: "100%", height: 200, marginBottom: 16 },
 });
