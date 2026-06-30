@@ -1,10 +1,6 @@
 import * as React from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
+import { StyleSheet } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Card, SegmentedButtons, useTheme } from "react-native-paper";
 import AnnounceForm from "../components/AnnounceForm";
 import CalculateForm from "../components/CalculateForm";
@@ -50,82 +46,80 @@ export default function HomeScreen() {
   ];
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: theme.colors.background }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: theme.colors.background },
+      ]}
+      keyboardShouldPersistTaps="handled"
+      extraScrollHeight={350}
+      enableOnAndroid
+      enableAutomaticScroll
+      keyboardOpeningTime={0}
     >
-      <ScrollView
-        contentContainerStyle={[
-          styles.container,
-          { backgroundColor: theme.colors.background },
+      {/* Hero carousel */}
+      <HeroCarousel slides={slides} />
+
+      {/* Mode toggle */}
+      <SegmentedButtons
+        value={mode}
+        onValueChange={setMode}
+        buttons={[
+          { value: "search", label: "Search Property", icon: "magnify" },
+          { value: "announce", label: "Announce Property", icon: "bullhorn" },
         ]}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Hero carousel */}
-        <HeroCarousel slides={slides} />
+        style={{ marginVertical: 8 }}
+      />
 
-        {/* Mode toggle */}
-        <SegmentedButtons
-          value={mode}
-          onValueChange={setMode}
-          buttons={[
-            { value: "search", label: "Search Property", icon: "magnify" },
-            { value: "announce", label: "Announce Property", icon: "bullhorn" },
-          ]}
-          style={{ marginVertical: 8 }}
+      {/* Card with sub-mode */}
+      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+        <Card.Title
+          title={mode === "search" ? "Search Properties" : "Announce Property"}
+          titleStyle={{ color: theme.colors.onSurface }}
         />
+        <Card.Content>
+          {mode === "search" ? (
+            <>
+              <SegmentedButtons
+                value={subMode}
+                onValueChange={(val) => setSubMode(val as "rent" | "buy")}
+                buttons={[
+                  { value: "rent", label: "Rent", icon: "key-outline" },
+                  { value: "buy", label: "Buy", icon: "cash-multiple" },
+                ]}
+                style={{ marginVertical: 8 }}
+              />
+              <PropertyForm type={subMode as "rent" | "buy"} />
+            </>
+          ) : (
+            <>
+              <SegmentedButtons
+                value={subMode}
+                onValueChange={(val) =>
+                  setSubMode(val as "announce" | "calculate")
+                }
+                buttons={[
+                  { value: "announce", label: "Announce", icon: "bullhorn" },
+                  {
+                    value: "calculate",
+                    label: "Calculate",
+                    icon: "calculator",
+                  },
+                ]}
+                style={{ marginVertical: 8 }}
+              />
+              {subMode === "announce" ? <AnnounceForm /> : <CalculateForm />}
+            </>
+          )}
+        </Card.Content>
+      </Card>
 
-        {/* Card with sub-mode */}
-        <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-          <Card.Title
-            title={
-              mode === "search" ? "Search Properties" : "Announce Property"
-            }
-            titleStyle={{ color: theme.colors.onSurface }}
-          />
-          <Card.Content>
-            {mode === "search" ? (
-              <>
-                <SegmentedButtons
-                  value={subMode}
-                  onValueChange={(val) => setSubMode(val as "rent" | "buy")}
-                  buttons={[
-                    { value: "rent", label: "Rent", icon: "key-outline" },
-                    { value: "buy", label: "Buy", icon: "cash-multiple" },
-                  ]}
-                  style={{ marginVertical: 8 }}
-                />
-                <PropertyForm type={subMode as "rent" | "buy"} />
-              </>
-            ) : (
-              <>
-                <SegmentedButtons
-                  value={subMode}
-                  onValueChange={(val) =>
-                    setSubMode(val as "announce" | "calculate")
-                  }
-                  buttons={[
-                    { value: "announce", label: "Announce", icon: "bullhorn" },
-                    {
-                      value: "calculate",
-                      label: "Calculate",
-                      icon: "calculator",
-                    },
-                  ]}
-                  style={{ marginVertical: 8 }}
-                />
-                {subMode === "announce" ? <AnnounceForm /> : <CalculateForm />}
-              </>
-            )}
-          </Card.Content>
-        </Card>
-
-        {/* New sections AFTER the form */}
-        <CallToActionSection />
-        <InfoSlides />
-        <FunnelSection />
-      </ScrollView>
-    </KeyboardAvoidingView>
+      {/* New sections AFTER the form */}
+      <CallToActionSection />
+      <InfoSlides />
+      <FunnelSection />
+    </KeyboardAwareScrollView>
   );
 }
 
