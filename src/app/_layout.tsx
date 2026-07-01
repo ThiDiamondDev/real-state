@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import * as Font from "expo-font";
 import { Drawer } from "expo-router/drawer";
 import * as React from "react";
@@ -8,6 +7,7 @@ import {
   Button,
   MD3DarkTheme,
   PaperProvider,
+  useTheme,
 } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
@@ -35,83 +35,128 @@ export default function Layout() {
     >
       <Drawer
         screenOptions={{
-          headerStyle: { backgroundColor: "#222" },
-          headerTintColor: "#fff",
-          drawerActiveTintColor: "#fff",
-          drawerInactiveTintColor: "#aaa",
-          drawerStyle: { backgroundColor: "#222" },
+          headerStyle: { backgroundColor: MD3DarkTheme.colors.surface },
+          headerTintColor: MD3DarkTheme.colors.onSurface,
+          drawerActiveTintColor: MD3DarkTheme.colors.onPrimary,
+          drawerInactiveTintColor: MD3DarkTheme.colors.onSurfaceVariant,
+          drawerStyle: { backgroundColor: MD3DarkTheme.colors.background },
         }}
-        drawerContent={({ navigation, state }) => (
-          <View style={{ flex: 1 }}>
-            {/* Custom header */}
-            <View style={styles.drawerHeader}>
-              <Avatar.Text size={64} label="T" />
-              <Text style={styles.drawerTitle}>Thiago</Text>
-              <Text style={styles.drawerDescription}>
-                Welcome to your real estate app.
-              </Text>
-              <Button
-                mode="contained"
-                style={styles.enterButton}
-                onPress={() => navigation.navigate("index")}
+        drawerContent={({ navigation, state }) => {
+          const theme = useTheme(); // ← Paper theme
+          return (
+            <View style={{ flex: 1 }}>
+              <View
+                style={[
+                  styles.drawerHeader,
+                  { backgroundColor: theme.colors.surfaceVariant },
+                ]}
               >
-                Enter
-              </Button>
-            </View>
-
-            {/* Drawer links */}
-            {state.routes.map((route, index) => {
-              const isFocused = state.index === index;
-
-              // Correct icon names
-              const iconName =
-                route.name === "index"
-                  ? "home"
-                  : route.name === "favorites"
-                    ? "heart-outline"
-                    : route.name === "about"
-                      ? "information-outline"
-                      : route.name === "rent"
-                        ? "key-outline"
-                        : route.name === "buy"
-                          ? "cash-multiple"
-                          : "circle";
-
-              return (
-                <TouchableOpacity
-                  key={route.key}
+                <Avatar.Text size={64} label="T" />
+                <Text
                   style={[
-                    styles.drawerItem,
-                    isFocused && styles.drawerItemActive,
+                    styles.drawerTitle,
+                    { color: theme.colors.onSurface },
                   ]}
-                  onPress={() => navigation.navigate(route.name)}
                 >
-                  {isFocused && <View style={styles.accentBar} />}
-                  <MaterialCommunityIcons
-                    name={iconName}
-                    size={24}
-                    color={isFocused ? "#fff" : "#aaa"}
-                    style={{ marginRight: 16 }}
-                  />
-                  <Text
-                    style={[
-                      styles.drawerItemText,
-                      { color: isFocused ? "#fff" : "#aaa" },
-                    ]}
-                  >
-                    {route.name.charAt(0).toUpperCase() + route.name.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
+                  Thiago
+                </Text>
+                <Text
+                  style={[
+                    styles.drawerDescription,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  Welcome to your real estate app.
+                </Text>
+                <Button
+                  mode="contained"
+                  style={styles.enterButton}
+                  onPress={() => navigation.navigate("index")}
+                >
+                  Enter
+                </Button>
+              </View>
+
+              {state.routes
+                .filter((route) =>
+                  [
+                    "index",
+                    "About",
+                    "Favorites",
+                    "Explore",
+                    "Rent",
+                    "Buy",
+                    "Contact",
+                  ].includes(route.name),
+                )
+                .map((route, index) => {
+                  const isFocused = state.index === index;
+                  const iconName =
+                    route.name === "index"
+                      ? "home"
+                      : route.name === "Favorites"
+                        ? "heart-outline"
+                        : route.name === "About"
+                          ? "information-outline"
+                          : route.name === "Explore"
+                            ? "magnify"
+                            : route.name === "Rent"
+                              ? "key-outline"
+                              : route.name === "Buy"
+                                ? "cash-multiple"
+                                : route.name === "Contact"
+                                  ? "phone-outline"
+                                  : "circle";
+
+                  return (
+                    <TouchableOpacity
+                      key={route.key}
+                      style={[
+                        styles.drawerItem,
+                        isFocused && {
+                          backgroundColor: theme.colors.surfaceVariant,
+                        },
+                      ]}
+                      onPress={() => navigation.navigate(route.name)}
+                    >
+                      {isFocused && (
+                        <View
+                          style={[
+                            styles.accentBar,
+                            { backgroundColor: theme.colors.primary },
+                          ]}
+                        />
+                      )}
+                      <MaterialCommunityIcons
+                        name={iconName}
+                        size={24}
+                        color={theme.colors.onSurfaceVariant}
+                        style={{ marginRight: 16 }}
+                      />
+                      <Text
+                        style={[
+                          styles.drawerItemText,
+                          {
+                            color: theme.colors.onSurfaceVariant,
+                          },
+                        ]}
+                      >
+                        {route.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+            </View>
+          );
+        }}
       >
         <Drawer.Screen name="index" options={{ title: "Home" }} />
-        <Drawer.Screen name="favorites" options={{ title: "Favorites" }} />
-        <Drawer.Screen name="about" options={{ title: "About" }} />
-        <Drawer.Screen name="rent" options={{ title: "Rent" }} />
-        <Drawer.Screen name="buy" options={{ title: "Buy" }} />
+        <Drawer.Screen name="Favorites" options={{ title: "Favorites" }} />
+        <Drawer.Screen name="About" options={{ title: "About" }} />
+        <Drawer.Screen name="Contact" options={{ title: "Contact" }} />
+        <Drawer.Screen name="Explore" options={{ title: "Explore" }} />
+        <Drawer.Screen name="Rent" options={{ title: "Rent" }} />
+        <Drawer.Screen name="Buy" options={{ title: "Buy" }} />
       </Drawer>
     </PaperProvider>
   );
@@ -119,19 +164,16 @@ export default function Layout() {
 
 const styles = StyleSheet.create({
   drawerHeader: {
-    backgroundColor: "#333",
     padding: 16,
     alignItems: "center",
     marginTop: 40,
   },
   drawerTitle: {
-    color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
     marginTop: 12,
   },
   drawerDescription: {
-    color: "#ccc",
     fontSize: 14,
     textAlign: "center",
     marginVertical: 12,
@@ -147,16 +189,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
   },
-  drawerItemActive: {
-    backgroundColor: "#333",
-  },
   drawerItemText: {
     fontSize: 16,
   },
   accentBar: {
     width: 4,
     height: "100%",
-    backgroundColor: "#0af",
     marginRight: 12,
     borderRadius: 2,
   },
