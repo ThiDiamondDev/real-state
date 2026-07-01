@@ -52,6 +52,42 @@ export default function HomeScreen() {
       onPress: () =>
         router.push({ pathname: "/Explore", params: { type: "terrain" } }),
     },
+    {
+      title: "Pet-Friendly Rentals",
+      description: "Find houses for rent that welcome pets.",
+      image:
+        "https://images.unsplash.com/photo-1581888227599-779811939961?auto=format&fit=crop&w=800&q=80",
+      cta: "Search Pet-Friendly Homes",
+      onPress: () =>
+        router.push({
+          pathname: "/Explore",
+          params: { type: "house", rentOrBuy: "rent", petsAllowed: "true" },
+        }),
+    },
+    {
+      title: "Rent in São Paulo",
+      description: "Explore rental properties in São Paulo.",
+      image:
+        "https://images.unsplash.com/photo-1645918899630-85e2f3132a84?auto=format&fit=crop&w=800&q=80",
+      cta: "Browse São Paulo Rentals",
+      onPress: () =>
+        router.push({
+          pathname: "/Explore",
+          params: { city: "São Paulo", rentOrBuy: "rent" },
+        }),
+    },
+    {
+      title: "Rent in Rio de Janeiro",
+      description: "Find apartments and houses for rent in Rio.",
+      image:
+        "https://images.unsplash.com/photo-1700677866588-95226be09b39?auto=format&fit=crop&w=800&q=80",
+      cta: "Explore Rio Rentals",
+      onPress: () =>
+        router.push({
+          pathname: "/Explore",
+          params: { city: "Rio de Janeiro", rentOrBuy: "rent" },
+        }),
+    },
   ];
 
   // Handler for search form submit
