@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient"; // ✅ gradient overlay
 import { Link } from "expo-router";
 import * as React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -59,8 +60,29 @@ export default function PropertyCard({
   return (
     <View>
       <Card style={styles.card}>
-        <Card.Cover style={styles.cover} source={{ uri: property.images[0] }} />
-        {/* ✅ Custom header section with themed background */}
+        <View>
+          <Card.Cover
+            style={styles.cover}
+            source={{ uri: property.images[0] }}
+          />
+          {/* ✅ Rent/Sale badge overlay with gradient */}
+          <LinearGradient
+            colors={["rgba(0, 0, 0, 0.92)", "rgba(0, 0, 0, 0.6)"]}
+            style={styles.badgeContainer}
+          >
+            <MaterialCommunityIcons
+              name={property.rentOrBuy === "rent" ? "key" : "home"}
+              size={18}
+              color="#fff"
+              style={{ marginRight: 4 }}
+            />
+            <Text style={styles.badgeText}>
+              {property.rentOrBuy === "rent" ? "For Rent" : "For Sale"}
+            </Text>
+          </LinearGradient>
+        </View>
+
+        {/* Header */}
         <View
           style={[
             styles.header,
@@ -90,7 +112,8 @@ export default function PropertyCard({
             />
           </TouchableOpacity>
         </View>
-        {/* ✅ 3-column grid */}
+
+        {/* Grid */}
         <Card.Content>
           <View style={styles.grid}>
             <View style={styles.gridItem}>
@@ -193,7 +216,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     borderRadius: 12,
-  }, // ✅ horizontal margin
+  },
+  cover: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -203,7 +227,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
   },
-  cover: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }, // ✅ rounded bottom corners
   headerText: { flex: 1 },
   title: { fontSize: 18, fontWeight: "bold" },
   subtitle: { fontSize: 14 },
@@ -229,4 +252,19 @@ const styles = StyleSheet.create({
     marginLeft: 120,
   },
   snackbarText: { fontWeight: "600", textAlign: "center" },
+  badgeContainer: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  badgeText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+  },
 });

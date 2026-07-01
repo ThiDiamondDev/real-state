@@ -1,19 +1,31 @@
 import { mockProperties } from "@/data/mockProperties";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
 import * as React from "react";
-import { Dimensions, Image, ScrollView, StyleSheet, View } from "react-native";
-import { Button, Text, useTheme } from "react-native-paper";
+import {
+  Dimensions,
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Button, Snackbar, Text, useTheme } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 const { width } = Dimensions.get("window");
+
 export default function PropertyDetailScreen() {
   const theme = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const property = mockProperties.find((p) => p.id === id);
 
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const [favorite, setFavorite] = React.useState(false);
+  const [snackbarVisible, setSnackbarVisible] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
 
-  // If property is found, set  page  title on expo app
   const navigation = require("expo-router").useNavigation();
   if (!property) {
     return (
@@ -25,11 +37,37 @@ export default function PropertyDetailScreen() {
     );
   }
   navigation.setOptions({ title: property.title });
+
+  // Load favorite state
   React.useEffect(() => {
-    if (property) {
-      // @ts-ignore
+    (async () => {
+      const stored = await AsyncStorage.getItem("favorites");
+      if (stored) {
+        const favorites: string[] = JSON.parse(stored);
+        setFavorite(favorites.includes(property.id));
+      }
+    })();
+  }, [property.id]);
+
+  const toggleFavorite = async () => {
+    const stored = await AsyncStorage.getItem("favorites");
+    let favorites: string[] = stored ? JSON.parse(stored) : [];
+
+    let newFav = false;
+    if (favorites.includes(property.id)) {
+      favorites = favorites.filter((fid) => fid !== property.id);
+      setSnackbarMessage("Removed from favorites");
+      newFav = false;
+    } else {
+      favorites.push(property.id);
+      setSnackbarMessage("Added to favorites");
+      newFav = true;
     }
-  }, [property]);
+
+    await AsyncStorage.setItem("favorites", JSON.stringify(favorites));
+    setFavorite(newFav);
+    setSnackbarVisible(true);
+  };
 
   return (
     <ScrollView
@@ -53,7 +91,7 @@ export default function PropertyDetailScreen() {
 
       {/* Pagination dots */}
       <View style={styles.pagination}>
-        {property.images.map((img: string, i: number) => (
+        {property.images.map((_, i: number) => (
           <View
             key={i}
             style={[styles.dot, activeIndex === i && styles.dotActive]}
@@ -61,84 +99,191 @@ export default function PropertyDetailScreen() {
         ))}
       </View>
 
+      {/* Badge + Favorite button */}
+      <View style={styles.topRow}>
+        <View
+          style={[
+            styles.badge,
+            {
+              backgroundColor:
+                property.rentOrBuy === "rent"
+                  ? theme.colors.primary
+                  : theme.colors.secondary,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name={property.rentOrBuy === "rent" ? "key" : "home"}
+            size={18}
+            color={theme.colors.onPrimary}
+            style={{ marginRight: 4 }}
+          />
+          <Text style={[styles.badgeText, { color: theme.colors.onPrimary }]}>
+            {property.rentOrBuy === "rent" ? "For Rent" : "For Sale"}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={toggleFavorite} style={styles.heartButton}>
+          <MaterialCommunityIcons
+            name={favorite ? "heart" : "heart-outline"}
+            size={36}
+            color={favorite ? theme.colors.error : theme.colors.onSurface}
+          />
+        </TouchableOpacity>
+      </View>
+
       {/* Title + subtitle */}
-      <Text style={styles.title}>{property.title}</Text>
-      <Text style={styles.subtitle}>
-        {property.city} — {property.district}
-      </Text>
-
-      {/* Details */}
-      <View style={styles.detailsRow}>
-        <MaterialCommunityIcons
-          name="currency-usd"
-          size={22}
-          color={theme.colors.primary}
-        />
-        <Text style={styles.detailText}>
-          {new Intl.NumberFormat("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          }).format(property.price)}
+      <View
+        style={[
+          styles.section,
+          { backgroundColor: theme.colors.surfaceVariant },
+        ]}
+      >
+        <Text style={[styles.title, { color: theme.colors.onSurface }]}>
+          {property.title}
+        </Text>
+        <Text
+          style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}
+        >
+          {property.city} — {property.district}
         </Text>
       </View>
 
-      <View style={styles.detailsRow}>
-        <MaterialCommunityIcons
-          name="bed"
-          size={22}
-          color={theme.colors.primary}
-        />
-        <Text style={styles.detailText}>{property.rooms} rooms</Text>
+      {/* Grid details */}
+      <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+        <View style={styles.grid}>
+          <View style={styles.gridItem}>
+            <MaterialCommunityIcons
+              name="currency-usd"
+              size={32}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.label}>Price</Text>
+            <Text style={styles.value}>
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(property.price)}
+            </Text>
+          </View>
+          <View style={styles.gridItem}>
+            <MaterialCommunityIcons
+              name="bed"
+              size={32}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.label}>Rooms</Text>
+            <Text style={styles.value}>{property.rooms}</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <MaterialCommunityIcons
+              name="shower"
+              size={32}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.label}>Bathrooms</Text>
+            <Text style={styles.value}>{property.bathrooms}</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <MaterialCommunityIcons
+              name="car"
+              size={32}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.label}>Car Spaces</Text>
+            <Text style={styles.value}>{property.carSpaces}</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <MaterialCommunityIcons
+              name={property.petsAllowed ? "paw" : "paw-off"}
+              size={32}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.label}>Pets</Text>
+            <Text style={styles.value}>
+              {property.petsAllowed ? "Allowed" : "Not allowed"}
+            </Text>
+          </View>
+          <View style={styles.gridItem}>
+            <MaterialCommunityIcons
+              name={property.nearMetro ? "train" : "train-off"}
+              size={32}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.label}>Near Metro</Text>
+            <Text style={styles.value}>
+              {property.nearMetro ? "Yes" : "No"}
+            </Text>
+          </View>
+        </View>
       </View>
 
-      <View style={styles.detailsRow}>
-        <MaterialCommunityIcons
-          name="car"
-          size={22}
-          color={theme.colors.primary}
-        />
-        <Text style={styles.detailText}>{property.carSpaces} car spaces</Text>
-      </View>
-
-      <View style={styles.detailsRow}>
-        <MaterialCommunityIcons
-          name="dog"
-          size={22}
-          color={
-            property.petsAllowed ? theme.colors.primary : theme.colors.onSurface
-          }
-        />
-        <Text style={styles.detailText}>
-          {property.petsAllowed ? "Pets allowed" : "No pets"}
-        </Text>
-      </View>
-
-      <View style={styles.detailsRow}>
-        <MaterialCommunityIcons
-          name="subway"
-          size={22}
-          color={
-            property.nearMetro ? theme.colors.primary : theme.colors.onSurface
-          }
-        />
-        <Text style={styles.detailText}>
-          {property.nearMetro ? "Near metro" : "Not near metro"}
-        </Text>
+      {/* Address section */}
+      <View
+        style={[
+          styles.section,
+          { backgroundColor: theme.colors.surfaceVariant },
+        ]}
+      >
+        <View style={styles.detailsRow}>
+          <MaterialCommunityIcons
+            name="map-marker"
+            size={22}
+            color={theme.colors.primary}
+          />
+          <Text style={styles.detailText}>
+            {property.address || "Address not available"}
+          </Text>
+        </View>
+        <Button
+          mode="outlined"
+          icon="map"
+          style={styles.button}
+          onPress={() => {
+            if (property.address) {
+              const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address)}`;
+              Linking.openURL(url);
+            }
+          }}
+        >
+          See on Maps
+        </Button>
       </View>
 
       {/* Description */}
-      <Text style={styles.description}>
-        This {property.type} is located in {property.district}, {property.city}.
-        Perfect for families or individuals looking for comfort and convenience.
-      </Text>
+      <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+        <Text style={styles.description}>
+          This {property.type} is located in {property.district},{" "}
+          {property.city}. Perfect for families or individuals looking for
+          comfort and convenience.
+        </Text>
+      </View>
 
       {/* Actions */}
-      <Button mode="contained" icon="phone" style={styles.button}>
-        Call Agent
-      </Button>
-      <Button mode="outlined" icon="email" style={styles.button}>
-        Send Message
-      </Button>
+      <View
+        style={[
+          styles.section,
+          { backgroundColor: theme.colors.surfaceVariant },
+        ]}
+      >
+        <Button mode="contained" icon="phone" style={styles.button}>
+          Call Agent
+        </Button>
+        <Button mode="outlined" icon="email" style={styles.button}>
+          Send Message
+        </Button>
+      </View>
+
+      {/* Snackbar */}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={2000}
+        style={[styles.snackbar, { backgroundColor: theme.colors.primary }]}
+      >
+        <Text style={[styles.snackbarText, { color: theme.colors.onPrimary }]}>
+          {snackbarMessage}
+        </Text>
+      </Snackbar>
     </ScrollView>
   );
 }
@@ -159,26 +304,76 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   dotActive: { backgroundColor: "#0af" },
+
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    elevation: 3,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  heartButton: { padding: 4 },
+
+  section: {
+    padding: 16,
+    marginBottom: 12,
+    borderRadius: 8,
+  },
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    marginTop: 12,
-    paddingHorizontal: 16,
+    marginBottom: 4,
   },
-  subtitle: { fontSize: 16, marginBottom: 12, paddingHorizontal: 16 },
+  subtitle: { fontSize: 16 },
+
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 12,
+  },
+  gridItem: {
+    width: "30%",
+    marginBottom: 12,
+    alignItems: "center",
+  },
+  label: { fontSize: 12, color: "#666", marginTop: 4 },
+  value: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 2,
+    textAlign: "center",
+  },
+
   detailsRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
-    paddingHorizontal: 16,
   },
   detailText: { marginLeft: 8, fontSize: 15 },
-  description: {
-    marginTop: 16,
-    fontSize: 15,
-    lineHeight: 22,
-    paddingHorizontal: 16,
-  },
-  button: { marginTop: 12, marginHorizontal: 16 },
+
+  description: { fontSize: 15, lineHeight: 22 },
+
+  button: { marginTop: 12 },
+
   notFound: { fontSize: 18, textAlign: "center", marginTop: 40 },
+
+  snackbar: {
+    borderRadius: 20,
+    marginHorizontal: 40,
+    marginBottom: 20,
+  },
+  snackbarText: { fontWeight: "600", textAlign: "center" },
 });

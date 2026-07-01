@@ -3,6 +3,7 @@ export interface Property {
   title: string;
   city: string;
   district: string;
+  address: string;
   price: number;
   rooms: number;
   bathrooms: number;
@@ -22,7 +23,7 @@ const images = [
   "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1594220862488-117b78382514?auto=format&fit=crop&w=800&q=80",
 ];
-
+const getRandomAddress = () => `${Math.floor(Math.random() * 1000)} Main St`;
 // Helper to pick random images
 function getRandomImages(count: number): string[] {
   const shuffled = [...images].sort(() => 0.5 - Math.random());
@@ -53,6 +54,7 @@ export const mockProperties: Property[] = Array.from({ length: 20 }).map(
       petsAllowed,
       nearMetro,
       bathrooms,
+      address: getRandomAddress(),
       rentOrBuy: Math.random() > 0.5 ? "rent" : "buy",
       images: getRandomImages(3), // ✅ each property gets 3 random images
     };
