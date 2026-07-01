@@ -1,18 +1,28 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Font from "expo-font";
 import { Drawer } from "expo-router/drawer";
 import * as React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useColorScheme,
+} from "react-native";
 import {
   Avatar,
-  Button,
   MD3DarkTheme,
+  MD3LightTheme,
   PaperProvider,
+  Switch,
   useTheme,
 } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function Layout() {
   const [iconsLoaded, setIconsLoaded] = React.useState(false);
+  const systemScheme = useColorScheme(); // system preference
+  const [isDark, setIsDark] = React.useState(systemScheme === "dark");
 
   React.useEffect(() => {
     async function loadFonts() {
@@ -22,40 +32,59 @@ export default function Layout() {
       setIconsLoaded(true);
     }
     loadFonts();
-  }, []);
+
+    // Load saved theme preference
+    (async () => {
+      const saved = await AsyncStorage.getItem("theme");
+      if (saved) {
+        setIsDark(saved === "dark");
+      } else {
+        setIsDark(systemScheme === "dark");
+      }
+    })();
+  }, [systemScheme]);
+
+  const toggleTheme = async () => {
+    const newValue = !isDark;
+    setIsDark(newValue);
+    await AsyncStorage.setItem("theme", newValue ? "dark" : "light");
+  };
 
   if (!iconsLoaded) {
     return null;
   }
 
+  const theme = isDark ? MD3DarkTheme : MD3LightTheme;
+
   return (
     <PaperProvider
-      theme={MD3DarkTheme}
+      theme={theme}
       settings={{ icon: (props) => <MaterialCommunityIcons {...props} /> }}
     >
       <Drawer
         screenOptions={{
-          headerStyle: { backgroundColor: MD3DarkTheme.colors.surface },
-          headerTintColor: MD3DarkTheme.colors.onSurface,
-          drawerActiveTintColor: MD3DarkTheme.colors.onPrimary,
-          drawerInactiveTintColor: MD3DarkTheme.colors.onSurfaceVariant,
-          drawerStyle: { backgroundColor: MD3DarkTheme.colors.background },
+          headerStyle: { backgroundColor: theme.colors.surface },
+          headerTintColor: theme.colors.onSurface,
+          drawerActiveTintColor: theme.colors.onPrimary,
+          drawerInactiveTintColor: theme.colors.onSurfaceVariant,
+          drawerStyle: { backgroundColor: theme.colors.background },
         }}
         drawerContent={({ navigation, state }) => {
-          const theme = useTheme(); // ← Paper theme
+          const paperTheme = useTheme();
           return (
             <View style={{ flex: 1 }}>
+              {/* Drawer Header */}
               <View
                 style={[
                   styles.drawerHeader,
-                  { backgroundColor: theme.colors.surfaceVariant },
+                  { backgroundColor: paperTheme.colors.surfaceVariant },
                 ]}
               >
                 <Avatar.Text size={64} label="T" />
                 <Text
                   style={[
                     styles.drawerTitle,
-                    { color: theme.colors.onSurface },
+                    { color: paperTheme.colors.onSurface },
                   ]}
                 >
                   Thiago
@@ -63,20 +92,33 @@ export default function Layout() {
                 <Text
                   style={[
                     styles.drawerDescription,
-                    { color: theme.colors.onSurfaceVariant },
+                    { color: paperTheme.colors.onSurfaceVariant },
                   ]}
                 >
                   Welcome to your real estate app.
                 </Text>
-                <Button
-                  mode="contained"
-                  style={styles.enterButton}
-                  onPress={() => navigation.navigate("index")}
-                >
-                  Enter
-                </Button>
+
+                {/* ✅ Theme toggle */}
+                <View style={styles.themeToggleRow}>
+                  <MaterialCommunityIcons
+                    name={isDark ? "weather-night" : "white-balance-sunny"}
+                    size={24}
+                    color={paperTheme.colors.onSurface}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text
+                    style={{
+                      color: paperTheme.colors.onSurface,
+                      marginRight: 8,
+                    }}
+                  >
+                    {isDark ? "Dark Mode" : "Light Mode"}
+                  </Text>
+                  <Switch value={isDark} onValueChange={toggleTheme} />
+                </View>
               </View>
 
+              {/* Drawer Items */}
               {state.routes
                 .filter((route) =>
                   [
@@ -114,7 +156,7 @@ export default function Layout() {
                       style={[
                         styles.drawerItem,
                         isFocused && {
-                          backgroundColor: theme.colors.surfaceVariant,
+                          backgroundColor: paperTheme.colors.surfaceVariant,
                         },
                       ]}
                       onPress={() => navigation.navigate(route.name)}
@@ -123,22 +165,20 @@ export default function Layout() {
                         <View
                           style={[
                             styles.accentBar,
-                            { backgroundColor: theme.colors.primary },
+                            { backgroundColor: paperTheme.colors.primary },
                           ]}
                         />
                       )}
                       <MaterialCommunityIcons
                         name={iconName}
                         size={24}
-                        color={theme.colors.onSurfaceVariant}
+                        color={paperTheme.colors.onSurfaceVariant}
                         style={{ marginRight: 16 }}
                       />
                       <Text
                         style={[
                           styles.drawerItemText,
-                          {
-                            color: theme.colors.onSurfaceVariant,
-                          },
+                          { color: paperTheme.colors.onSurfaceVariant },
                         ]}
                       >
                         {route.name}
@@ -146,6 +186,43 @@ export default function Layout() {
                     </TouchableOpacity>
                   );
                 })}
+
+              {/* Footer */}
+              <View
+                style={[
+                  styles.footer,
+                  { borderTopColor: paperTheme.colors.surfaceVariant },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.footerText,
+                    { color: paperTheme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  © 2026 Thiago
+                </Text>
+                <View style={styles.footerIcons}>
+                  <MaterialCommunityIcons
+                    name="github"
+                    size={22}
+                    color={paperTheme.colors.onSurfaceVariant}
+                    style={styles.footerIcon}
+                  />
+                  <MaterialCommunityIcons
+                    name="linkedin"
+                    size={22}
+                    color={paperTheme.colors.onSurfaceVariant}
+                    style={styles.footerIcon}
+                  />
+                  <MaterialCommunityIcons
+                    name="web"
+                    size={22}
+                    color={paperTheme.colors.onSurfaceVariant}
+                    style={styles.footerIcon}
+                  />
+                </View>
+              </View>
             </View>
           );
         }}
@@ -178,10 +255,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 12,
   },
-  enterButton: {
+  themeToggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 12,
-    marginBottom: 32,
     alignSelf: "stretch",
+    justifyContent: "center",
   },
   drawerItem: {
     flexDirection: "row",
@@ -197,5 +276,23 @@ const styles = StyleSheet.create({
     height: "100%",
     marginRight: 12,
     borderRadius: 2,
+  },
+  footer: {
+    marginTop: "auto",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 14,
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  footerIcons: {
+    flexDirection: "row",
+  },
+  footerIcon: {
+    marginHorizontal: 8,
   },
 });
