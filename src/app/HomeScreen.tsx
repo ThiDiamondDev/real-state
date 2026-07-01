@@ -1,6 +1,6 @@
-import { Link, router } from "expo-router"; // ✅ Expo Router navigation
+import { router } from "expo-router";
 import * as React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Card, SegmentedButtons, useTheme } from "react-native-paper";
 import AnnounceForm from "../components/AnnounceForm";
@@ -10,12 +10,19 @@ import FunnelSection from "../components/FunnelSection";
 import HeroCarousel, { HeroSlide } from "../components/HeroCarousel";
 import InfoSlides from "../components/InfoSlides";
 import PropertyForm from "../components/PropertyForm";
+
 export default function HomeScreen() {
   const theme = useTheme();
   const [mode, setMode] = React.useState<"search" | "announce">("search");
   const [subMode, setSubMode] = React.useState<
     "rent" | "buy" | "announce" | "calculate"
   >("rent");
+
+  // Reset subMode when mode changes
+  React.useEffect(() => {
+    if (mode === "search") setSubMode("rent");
+    else setSubMode("announce");
+  }, [mode]);
 
   const slides: HeroSlide[] = [
     {
@@ -47,19 +54,34 @@ export default function HomeScreen() {
     },
   ];
 
+  // Handler for search form submit
+  const handleSearch = (filters: any) => {
+    router.push({
+      pathname: "/Explore",
+      params: { ...filters, rentOrBuy: subMode },
+    });
+  };
+
   return (
     <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      keyboardShouldPersistTaps="handled"
+      contentInsetAdjustmentBehavior="always"
+      enableOnAndroid={true}
+      extraScrollHeight={40} // small buffer when keyboard opens
+      extraHeight={75} // overall scroll offset
+      keyboardOpeningTime={0}
       contentContainerStyle={[
         styles.container,
         { backgroundColor: theme.colors.background },
       ]}
     >
-      <HeroCarousel slides={slides} />
+      <View style={styles.heroWrapper}>
+        <HeroCarousel slides={slides} />
+      </View>
 
       <SegmentedButtons
         value={mode}
-        onValueChange={setMode}
+        onValueChange={(val) => setMode(val as "search" | "announce")}
         buttons={[
           { value: "search", label: "Search Property", icon: "magnify" },
           { value: "announce", label: "Announce Property", icon: "bullhorn" },
@@ -81,9 +103,10 @@ export default function HomeScreen() {
                   { value: "buy", label: "Buy", icon: "cash-multiple" },
                 ]}
               />
-              <PropertyForm type={subMode as "rent" | "buy"} />
-              {/* ✅ Link to Explore */}
-              <Link href="/explore">Go to Explore</Link>
+              <PropertyForm
+                type={subMode as "rent" | "buy"}
+                onSearch={handleSearch}
+              />
             </>
           ) : (
             <>
@@ -116,5 +139,6 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, padding: 16 },
+  heroWrapper: { marginBottom: 24 }, // ✅ spacing after hero
   card: { marginTop: 16 },
 });

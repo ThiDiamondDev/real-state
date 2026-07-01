@@ -2,17 +2,25 @@ import * as React from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Menu, Portal, TextInput, useTheme } from "react-native-paper";
 
-export default function PropertyForm({ type }: { type: "rent" | "buy" }) {
+interface PropertyFormProps {
+  type: "rent" | "buy";
+  onSearch?: (filters: {
+    type: "rent" | "buy";
+    city: string;
+    district: string;
+    rooms: string;
+    value: string;
+  }) => void;
+}
+
+export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
   const theme = useTheme();
 
   const [cityMenu, setCityMenu] = React.useState(false);
   const [city, setCity] = React.useState("");
-
   const [district, setDistrict] = React.useState("");
-
   const [valueMenu, setValueMenu] = React.useState(false);
   const [value, setValue] = React.useState("");
-
   const [roomsMenu, setRoomsMenu] = React.useState(false);
   const [rooms, setRooms] = React.useState("");
 
@@ -24,6 +32,14 @@ export default function PropertyForm({ type }: { type: "rent" | "buy" }) {
         }).format(Number(value))
       : "";
 
+  const handleSubmit = () => {
+    const filters = { type, city, district, rooms, value };
+    console.log("Search with:", filters);
+    if (onSearch) {
+      onSearch(filters);
+    }
+  };
+
   return (
     <View style={styles.form}>
       {/* City Dropdown */}
@@ -32,7 +48,7 @@ export default function PropertyForm({ type }: { type: "rent" | "buy" }) {
           label="City"
           value={city}
           left={<TextInput.Icon icon="city" />}
-          editable={true}
+          editable
           style={styles.input}
           mode="outlined"
           theme={{ colors: { primary: theme.colors.primary } }}
@@ -77,7 +93,7 @@ export default function PropertyForm({ type }: { type: "rent" | "buy" }) {
           label={type === "rent" ? "Max Rent (R$)" : "Max Price (R$)"}
           value={formattedValue || value}
           left={<TextInput.Icon icon="currency-usd" />}
-          editable={true}
+          editable
           style={styles.input}
           mode="outlined"
           theme={{ colors: { primary: theme.colors.primary } }}
@@ -113,7 +129,7 @@ export default function PropertyForm({ type }: { type: "rent" | "buy" }) {
           label="Rooms"
           value={rooms}
           left={<TextInput.Icon icon="bed" />}
-          editable={true}
+          editable
           style={styles.input}
           mode="outlined"
           theme={{ colors: { primary: theme.colors.primary } }}
@@ -141,13 +157,7 @@ export default function PropertyForm({ type }: { type: "rent" | "buy" }) {
       </View>
 
       {/* Submit button */}
-      <Button
-        mode="contained"
-        style={styles.button}
-        onPress={() => {
-          console.log("Search with:", { type, city, district, rooms, value });
-        }}
-      >
+      <Button mode="contained" style={styles.button} onPress={handleSubmit}>
         Search
       </Button>
     </View>
