@@ -14,11 +14,10 @@ export default function PropertyCard({
   onFavoriteChange?: (id: string, fav: boolean) => void;
 }) {
   const theme = useTheme();
+  const [internalFavorite, setInternalFavorite] = React.useState(false);
   const [snackbarVisible, setSnackbarVisible] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
 
-  // ✅ Use prop directly if provided (Explore). Otherwise, manage internally (Favorites).
-  const [internalFavorite, setInternalFavorite] = React.useState(false);
   React.useEffect(() => {
     if (property.isFavorite !== undefined) {
       setInternalFavorite(property.isFavorite);
@@ -60,26 +59,37 @@ export default function PropertyCard({
   return (
     <View>
       <Card style={styles.card}>
-        <Card.Cover source={{ uri: property.images[0] }} />
-        <Card.Title
-          title={property.title}
-          subtitle={`${property.city} — ${property.district}`}
-          right={() => (
-            <TouchableOpacity
-              onPress={toggleFavorite}
-              style={styles.heartButton}
+        <Card.Cover style={styles.cover} source={{ uri: property.images[0] }} />
+        {/* ✅ Custom header section with themed background */}
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: theme.colors.surfaceVariant },
+          ]}
+        >
+          <View style={styles.headerText}>
+            <Text style={[styles.title, { color: theme.colors.onSurface }]}>
+              {property.title}
+            </Text>
+            <Text
+              style={[
+                styles.subtitle,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
             >
-              <MaterialCommunityIcons
-                name={internalFavorite ? "heart" : "heart-outline"}
-                size={40}
-                color={
-                  internalFavorite ? theme.colors.error : theme.colors.onSurface
-                }
-              />
-            </TouchableOpacity>
-          )}
-        />
-
+              {property.city} — {property.district}
+            </Text>
+          </View>
+          <TouchableOpacity onPress={toggleFavorite} style={styles.heartButton}>
+            <MaterialCommunityIcons
+              name={internalFavorite ? "heart" : "heart-outline"}
+              size={40}
+              color={
+                internalFavorite ? theme.colors.error : theme.colors.onSurface
+              }
+            />
+          </TouchableOpacity>
+        </View>
         {/* ✅ 3-column grid */}
         <Card.Content>
           <View style={styles.grid}>
@@ -135,6 +145,17 @@ export default function PropertyCard({
                 {property.petsAllowed ? "Allowed" : "Not allowed"}
               </Text>
             </View>
+            <View style={styles.gridItem}>
+              <MaterialCommunityIcons
+                name={property.nearMetro ? "train" : "train-off"}
+                size={32}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.label}>Near Metro</Text>
+              <Text style={styles.value}>
+                {property.nearMetro ? "Yes" : "No"}
+              </Text>
+            </View>
           </View>
         </Card.Content>
 
@@ -166,8 +187,27 @@ export default function PropertyCard({
 }
 
 const styles = StyleSheet.create({
-  card: { marginBottom: 16 },
-  heartButton: { marginRight: 20 },
+  card: {
+    marginBottom: 16,
+    marginHorizontal: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    borderRadius: 12,
+  }, // ✅ horizontal margin
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+  },
+  cover: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }, // ✅ rounded bottom corners
+  headerText: { flex: 1 },
+  title: { fontSize: 18, fontWeight: "bold" },
+  subtitle: { fontSize: 14 },
+  heartButton: { marginLeft: 12 },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
