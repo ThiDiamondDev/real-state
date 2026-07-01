@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import * as React from "react";
 import {
   ActivityIndicator,
@@ -16,47 +16,97 @@ import { mockProperties, Property } from "../data/mockProperties";
 
 export default function ExploreScreen() {
   const theme = useTheme();
-  const [results, setResults] =
-    React.useState<(Property & { isFavorite?: boolean })[]>(mockProperties);
-  const [loading, setLoading] = React.useState(false);
-  const [refreshing, setRefreshing] = React.useState(false);
+  const rawParams = useLocalSearchParams();
 
-  const reloadFavorites = async (list?: Property[]) => {
-    const stored = await AsyncStorage.getItem("favorites");
-    const ids: string[] = stored ? JSON.parse(stored) : [];
-    const base = list ?? mockProperties;
-    setResults(base.map((p) => ({ ...p, isFavorite: ids.includes(p.id) })));
+  const initialFilters: Filters = {
+    city: typeof rawParams.city === "string" ? rawParams.city : "",
+    district: typeof rawParams.district === "string" ? rawParams.district : "",
+    value: rawParams.value ? Number(rawParams.value) : 10000,
+    rooms: typeof rawParams.rooms === "string" ? rawParams.rooms : "",
+    type:
+      typeof rawParams.type === "string"
+        ? (rawParams.type as Filters["type"])
+        : "",
+    rentOrBuy:
+      typeof rawParams.rentOrBuy === "string"
+        ? (rawParams.rentOrBuy as Filters["rentOrBuy"])
+        : "",
+    petsAllowed: rawParams.petsAllowed === "true",
+    nearMetro: rawParams.nearMetro === "true",
+    carSpaces: rawParams.carSpaces ? Number(rawParams.carSpaces) : 0,
   };
 
-  const handleSearch = (filters: Filters) => {
-    setLoading(true);
-    const filtered = mockProperties.filter((p) => {
+  const filterProperties = (filters: Filters) => {
+    return mockProperties.filter((p) => {
       return (
-        (!filters.city || p.city === filters.city) &&
-        (!filters.district || p.district.includes(filters.district)) &&
+        (!filters.city ||
+          p.city.toLowerCase() === filters.city.toLowerCase()) &&
+        (!filters.district ||
+          p.district.toLowerCase().includes(filters.district.toLowerCase())) &&
         (!filters.value || p.price <= filters.value) &&
         (!filters.rooms || p.rooms >= Number(filters.rooms.replace("+", ""))) &&
-        (!filters.type || p.type === filters.type) &&
+        (!filters.type ||
+          p.type.toLowerCase() === filters.type.toLowerCase()) &&
+        (!filters.rentOrBuy ||
+          p.rentOrBuy.toLowerCase() === filters.rentOrBuy.toLowerCase()) &&
         (!filters.petsAllowed || p.petsAllowed) &&
         (!filters.nearMetro || p.nearMetro) &&
         (!filters.carSpaces || p.carSpaces >= filters.carSpaces)
       );
     });
-    reloadFavorites(filtered); // ✅ apply favorites state to filtered list
+  };
+
+  // ✅ Initialize results directly with filtered list
+  const [results, setResults] = React.useState<
+    (Property & { isFavorite?: boolean })[]
+  >(() => {
+    const filtered =
+      Object.keys(rawParams).length > 0
+        ? filterProperties(initialFilters)
+        : mockProperties;
+    return filtered.map((p) => ({ ...p, isFavorite: false }));
+  });
+
+  const [loading, setLoading] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const applyFavorites = async (list: Property[]) => {
+    const stored = await AsyncStorage.getItem("favorites");
+    const ids: string[] = stored ? JSON.parse(stored) : [];
+    setResults(list.map((p) => ({ ...p, isFavorite: ids.includes(p.id) })));
+  };
+
+  const handleSearch = (filters: Filters) => {
+    setLoading(true);
+    const filtered = filterProperties(filters);
+    applyFavorites(filtered);
     setLoading(false);
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      reloadFavorites(); // ✅ reload when screen is focused
-    }, []),
-  );
-
   const onRefresh = async () => {
     setRefreshing(true);
-    await reloadFavorites();
+    await applyFavorites(results); // refresh current list
     setRefreshing(false);
   };
+
+  // ✅ Re-filter whenever params change
+  React.useEffect(() => {
+    const run = async () => {
+      const stored = await AsyncStorage.getItem("favorites");
+      const ids: string[] = stored ? JSON.parse(stored) : [];
+
+      const filtered =
+        Object.keys(rawParams).length > 0
+          ? filterProperties(initialFilters)
+          : mockProperties;
+
+      setResults(
+        filtered.map((p) => ({ ...p, isFavorite: ids.includes(p.id) })),
+      );
+    };
+
+    run();
+  }, [JSON.stringify(rawParams)]); // depend on params
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -83,7 +133,6 @@ export default function ExploreScreen() {
           <PropertyCard
             property={item}
             onFavoriteChange={(id, fav) => {
-              // ✅ update local list immediately when toggled
               setResults((prev) =>
                 prev.map((p) => (p.id === id ? { ...p, isFavorite: fav } : p)),
               );
@@ -102,14 +151,7 @@ export default function ExploreScreen() {
           />
         }
         ListHeaderComponent={
-          <KeyboardAwareScrollView
-            contentContainerStyle={styles.formContainer}
-            keyboardShouldPersistTaps="handled"
-            enableOnAndroid
-            enableAutomaticScroll
-            extraScrollHeight={40}
-            keyboardOpeningTime={0}
-          >
+          <KeyboardAwareScrollView contentContainerStyle={styles.formContainer}>
             <Text style={[styles.title, { color: theme.colors.primary }]}>
               Explore Properties
             </Text>
@@ -118,7 +160,11 @@ export default function ExploreScreen() {
             >
               Use the filters below to refine your search.
             </Text>
-            <FilterForm onSearch={handleSearch} />
+            <FilterForm
+              key={JSON.stringify(initialFilters)} // ensures pre-population
+              onSearch={handleSearch}
+              initialFilters={initialFilters}
+            />
           </KeyboardAwareScrollView>
         }
       />

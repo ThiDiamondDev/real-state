@@ -1,4 +1,4 @@
-import { Link } from "expo-router"; // ✅ Expo Router navigation
+import { Link, router } from "expo-router"; // ✅ Expo Router navigation
 import * as React from "react";
 import { StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -10,7 +10,6 @@ import FunnelSection from "../components/FunnelSection";
 import HeroCarousel, { HeroSlide } from "../components/HeroCarousel";
 import InfoSlides from "../components/InfoSlides";
 import PropertyForm from "../components/PropertyForm";
-
 export default function HomeScreen() {
   const theme = useTheme();
   const [mode, setMode] = React.useState<"search" | "announce">("search");
@@ -25,25 +24,26 @@ export default function HomeScreen() {
       image:
         "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
       cta: "Explore Houses",
-      onPress: () => setMode("search"),
+      onPress: () =>
+        router.push({ pathname: "/Explore", params: { type: "house" } }),
     },
     {
       title: "City Apartment",
       description: "Stylish apartments in vibrant areas...",
       image:
         "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80",
-
       cta: "Browse Apartments",
-      onPress: () => setMode("search"),
+      onPress: () =>
+        router.push({ pathname: "/Explore", params: { type: "apartment" } }),
     },
     {
       title: "Open Terrain",
       description: "Invest in land and build your future.",
       image:
         "https://images.unsplash.com/photo-1594220862488-117b78382514?auto=format&fit=crop&w=800&q=80",
-
       cta: "View Terrains",
-      onPress: () => setMode("search"),
+      onPress: () =>
+        router.push({ pathname: "/Explore", params: { type: "terrain" } }),
     },
   ];
 

@@ -7,6 +7,7 @@ export interface Property {
   rooms: number;
   bathrooms: number;
   type: "apartment" | "house" | "terrain";
+  rentOrBuy: "rent" | "buy";
   carSpaces: number;
   petsAllowed: boolean;
   nearMetro: boolean;
@@ -52,6 +53,7 @@ export const mockProperties: Property[] = Array.from({ length: 20 }).map(
       petsAllowed,
       nearMetro,
       bathrooms,
+      rentOrBuy: Math.random() > 0.5 ? "rent" : "buy",
       images: getRandomImages(3), // ✅ each property gets 3 random images
     };
   },
