@@ -34,6 +34,7 @@ export default function ExploreScreen() {
     petsAllowed: rawParams.petsAllowed === "true",
     nearMetro: rawParams.nearMetro === "true",
     carSpaces: rawParams.carSpaces ? Number(rawParams.carSpaces) : 0,
+    bathrooms: "",
   };
 
   const filterProperties = (filters: Filters) => {

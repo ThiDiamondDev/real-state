@@ -65,9 +65,9 @@ export default function HomeScreen() {
   return (
     <KeyboardAwareScrollView
       keyboardShouldPersistTaps="handled"
-      contentInsetAdjustmentBehavior="always"
+      contentInsetAdjustmentBehavior="never"
       enableOnAndroid={true}
-      extraScrollHeight={40} // small buffer when keyboard opens
+      extraScrollHeight={100} // small buffer when keyboard opens
       extraHeight={75} // overall scroll offset
       keyboardOpeningTime={0}
       contentContainerStyle={[

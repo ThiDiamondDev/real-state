@@ -59,7 +59,7 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
             visible={cityMenu}
             onDismiss={() => setCityMenu(false)}
             anchor={<View style={{ width: 1, height: 1 }} />}
-            style={{ marginLeft: 200, marginTop: 100 }}
+            style={{ marginLeft: 200, marginTop: 200 }}
           >
             {["São Paulo", "Rio de Janeiro", "Brasília"].map((c) => (
               <Menu.Item
@@ -104,7 +104,7 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
             visible={valueMenu}
             onDismiss={() => setValueMenu(false)}
             anchor={<View style={{ width: 1, height: 1 }} />}
-            style={{ marginLeft: 200, marginTop: 100 }}
+            style={{ marginLeft: 200, marginTop: 300 }}
           >
             {["1000", "2000", "3000", "5000"].map((v) => (
               <Menu.Item
@@ -140,7 +140,7 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
             visible={roomsMenu}
             onDismiss={() => setRoomsMenu(false)}
             anchor={<View style={{ width: 1, height: 1 }} />}
-            style={{ marginLeft: 200, marginTop: 100 }}
+            style={{ marginLeft: 200, marginTop: 300 }}
           >
             {["1+", "2+", "3+", "4+"].map((r) => (
               <Menu.Item

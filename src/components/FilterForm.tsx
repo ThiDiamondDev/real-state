@@ -18,6 +18,7 @@ export interface Filters {
   district: string;
   value: number;
   rooms: string;
+  bathrooms: string;
   type: "apartment" | "house" | "terrain" | "";
   rentOrBuy: "rent" | "buy" | "";
   petsAllowed: boolean;
@@ -41,6 +42,9 @@ export default function FilterForm({
   );
   const [value, setValue] = React.useState(initialFilters?.value ?? 3000);
   const [rooms, setRooms] = React.useState(initialFilters?.rooms || "");
+  const [bathrooms, setBathrooms] = React.useState(
+    initialFilters?.bathrooms || "",
+  );
   const [type, setType] = React.useState<Filters["type"]>(
     initialFilters?.type || "",
   );
@@ -59,6 +63,7 @@ export default function FilterForm({
 
   const [cityMenu, setCityMenu] = React.useState(false);
   const [roomsMenu, setRoomsMenu] = React.useState(false);
+  const [bathroomsMenu, setBathroomsMenu] = React.useState(false);
   const [carMenu, setCarMenu] = React.useState(false);
 
   const maxPrice = 10000;
@@ -79,7 +84,8 @@ export default function FilterForm({
           <Menu
             visible={cityMenu}
             onDismiss={() => setCityMenu(false)}
-            anchor={<View />}
+            anchor={<View style={{ width: 1, height: 1 }} />}
+            style={{ marginLeft: 200, marginTop: 200 }}
           >
             {["São Paulo", "Rio de Janeiro", "Brasília"].map((c) => (
               <Menu.Item
@@ -121,7 +127,7 @@ export default function FilterForm({
           minimumTrackTintColor={theme.colors.primary}
           maximumTrackTintColor={theme.colors.surfaceVariant}
           thumbTintColor={theme.colors.primary}
-          style={{ marginVertical: 12, height: 40 }} // thicker bar
+          style={{ marginVertical: 12, height: 40 }}
         />
 
         {/* Rooms */}
@@ -137,7 +143,8 @@ export default function FilterForm({
           <Menu
             visible={roomsMenu}
             onDismiss={() => setRoomsMenu(false)}
-            anchor={<View />}
+            anchor={<View style={{ width: 1, height: 1 }} />}
+            style={{ marginLeft: 200, marginTop: 300 }}
           >
             {["1+", "2+", "3+", "4+"].map((r) => (
               <Menu.Item
@@ -147,6 +154,35 @@ export default function FilterForm({
                   setRoomsMenu(false);
                 }}
                 title={r}
+              />
+            ))}
+          </Menu>
+        </Portal>
+
+        {/* Bathrooms */}
+        <TextInput
+          label="Bathrooms"
+          value={bathrooms}
+          left={<TextInput.Icon icon="shower" />}
+          style={styles.input}
+          mode="outlined"
+          onPressIn={() => setBathroomsMenu(true)}
+        />
+        <Portal>
+          <Menu
+            visible={bathroomsMenu}
+            onDismiss={() => setBathroomsMenu(false)}
+            anchor={<View style={{ width: 1, height: 1 }} />}
+            style={{ marginLeft: 200, marginTop: 300 }}
+          >
+            {["1+", "2+", "3+", "4+"].map((b) => (
+              <Menu.Item
+                key={b}
+                onPress={() => {
+                  setBathrooms(b);
+                  setBathroomsMenu(false);
+                }}
+                title={b}
               />
             ))}
           </Menu>
@@ -192,7 +228,8 @@ export default function FilterForm({
           <Menu
             visible={carMenu}
             onDismiss={() => setCarMenu(false)}
-            anchor={<View />}
+            anchor={<View style={{ width: 1, height: 1 }} />}
+            style={{ marginLeft: 200, marginTop: 300 }}
           >
             {[0, 1, 2, 3].map((c) => (
               <Menu.Item
@@ -240,6 +277,7 @@ export default function FilterForm({
               district,
               value,
               rooms,
+              bathrooms,
               type,
               rentOrBuy,
               petsAllowed,
