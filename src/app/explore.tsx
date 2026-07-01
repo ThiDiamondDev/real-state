@@ -1,180 +1,145 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "expo-router";
+import * as React from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Text, useTheme } from "react-native-paper";
+import FilterForm, { Filters } from "../components/FilterForm";
+import PropertyCard from "../components/PropertyCard";
+import { mockProperties, Property } from "../data/mockProperties";
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
+export default function ExploreScreen() {
   const theme = useTheme();
+  const [results, setResults] =
+    React.useState<(Property & { isFavorite?: boolean })[]>(mockProperties);
+  const [loading, setLoading] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+  const reloadFavorites = async (list?: Property[]) => {
+    const stored = await AsyncStorage.getItem("favorites");
+    const ids: string[] = stored ? JSON.parse(stored) : [];
+    const base = list ?? mockProperties;
+    setResults(base.map((p) => ({ ...p, isFavorite: ids.includes(p.id) })));
+  };
+
+  const handleSearch = (filters: Filters) => {
+    setLoading(true);
+    const filtered = mockProperties.filter((p) => {
+      return (
+        (!filters.city || p.city === filters.city) &&
+        (!filters.district || p.district.includes(filters.district)) &&
+        (!filters.value || p.price <= filters.value) &&
+        (!filters.rooms || p.rooms >= Number(filters.rooms.replace("+", ""))) &&
+        (!filters.type || p.type === filters.type) &&
+        (!filters.petsAllowed || p.petsAllowed) &&
+        (!filters.nearMetro || p.nearMetro) &&
+        (!filters.carSpaces || p.carSpaces >= filters.carSpaces)
+      );
+    });
+    reloadFavorites(filtered); // ✅ apply favorites state to filtered list
+    setLoading(false);
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      reloadFavorites(); // ✅ reload when screen is focused
+    }, []),
+  );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await reloadFavorites();
+    setRefreshing(false);
+  };
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      {loading && (
+        <View
+          style={[
+            styles.loadingOverlay,
+            { backgroundColor: theme.colors.background },
+          ]}
+        >
+          <ActivityIndicator size="large" color={theme.colors.onBackground} />
+          <Text
+            style={[styles.loadingText, { color: theme.colors.onBackground }]}
+          >
+            Filtering properties...
+          </Text>
+        </View>
+      )}
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
-
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
-
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+      <FlatList
+        data={results}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <PropertyCard
+            property={item}
+            onFavoriteChange={(id, fav) => {
+              // ✅ update local list immediately when toggled
+              setResults((prev) =>
+                prev.map((p) => (p.id === id ? { ...p, isFavorite: fav } : p)),
+              );
+            }}
+          />
+        )}
+        contentContainerStyle={styles.list}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.colors.onBackground]}
+            tintColor={theme.colors.onBackground}
+            progressBackgroundColor={theme.colors.surface}
+          />
+        }
+        ListHeaderComponent={
+          <KeyboardAwareScrollView
+            contentContainerStyle={styles.formContainer}
+            keyboardShouldPersistTaps="handled"
+            enableOnAndroid
+            enableAutomaticScroll
+            extraScrollHeight={40}
+            keyboardOpeningTime={0}
+          >
+            <Text style={[styles.title, { color: theme.colors.primary }]}>
+              Explore Properties
+            </Text>
+            <Text
+              style={[styles.description, { color: theme.colors.onBackground }]}
+            >
+              Use the filters below to refine your search.
+            </Text>
+            <FilterForm onSearch={handleSearch} />
+          </KeyboardAwareScrollView>
+        }
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
+  formContainer: { padding: 16 },
+  list: { paddingBottom: 16 },
+  title: { fontSize: 22, fontWeight: "bold", marginBottom: 4 },
+  description: { fontSize: 14, marginBottom: 12 },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-  },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
+  loadingText: {
+    marginTop: 12,
+    fontSize: 18,
+    fontWeight: "600",
   },
 });
