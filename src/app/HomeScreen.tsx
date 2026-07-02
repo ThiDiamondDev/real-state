@@ -1,3 +1,4 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
 import { router } from "expo-router";
 import * as React from "react";
 import { StyleSheet, View } from "react-native";
@@ -12,7 +13,10 @@ import InfoSlides from "../components/InfoSlides";
 import PropertyForm from "../components/PropertyForm";
 
 export default function HomeScreen() {
+  // ✅ Consume context correctly
+  const { t } = React.useContext(LanguageContext);
   const theme = useTheme();
+
   const [mode, setMode] = React.useState<"search" | "announce">("search");
   const [subMode, setSubMode] = React.useState<
     "rent" | "buy" | "announce" | "calculate"
@@ -26,38 +30,38 @@ export default function HomeScreen() {
 
   const slides: HeroSlide[] = [
     {
-      title: "Modern House",
-      description: "Discover spacious family homes...",
+      title: t.modernHouse,
+      description: t.modernDesc,
       image:
         "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
-      cta: "Explore Houses",
+      cta: t.modernCTA,
       onPress: () =>
         router.push({ pathname: "/Explore", params: { type: "house" } }),
     },
     {
-      title: "City Apartment",
-      description: "Stylish apartments in vibrant areas...",
+      title: t.cityApartment,
+      description: t.cityDesc,
       image:
         "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80",
-      cta: "Browse Apartments",
+      cta: t.cityCTA,
       onPress: () =>
         router.push({ pathname: "/Explore", params: { type: "apartment" } }),
     },
     {
-      title: "Open Terrain",
-      description: "Invest in land and build your future.",
+      title: t.terrain,
+      description: t.terrainDesc,
       image:
         "https://images.unsplash.com/photo-1594220862488-117b78382514?auto=format&fit=crop&w=800&q=80",
-      cta: "View Terrains",
+      cta: t.terrainCTA,
       onPress: () =>
         router.push({ pathname: "/Explore", params: { type: "terrain" } }),
     },
     {
-      title: "Pet-Friendly Rentals",
-      description: "Find houses for rent that welcome pets.",
+      title: t.petFriendly,
+      description: t.petDesc,
       image:
         "https://images.unsplash.com/photo-1581888227599-779811939961?auto=format&fit=crop&w=800&q=80",
-      cta: "Search Pet-Friendly Homes",
+      cta: t.petCTA,
       onPress: () =>
         router.push({
           pathname: "/Explore",
@@ -65,11 +69,11 @@ export default function HomeScreen() {
         }),
     },
     {
-      title: "Rent in São Paulo",
-      description: "Explore rental properties in São Paulo.",
+      title: t.saoPaulo,
+      description: t.saoPauloDesc,
       image:
         "https://images.unsplash.com/photo-1645918899630-85e2f3132a84?auto=format&fit=crop&w=800&q=80",
-      cta: "Browse São Paulo Rentals",
+      cta: t.saoPauloCTA,
       onPress: () =>
         router.push({
           pathname: "/Explore",
@@ -77,11 +81,11 @@ export default function HomeScreen() {
         }),
     },
     {
-      title: "Rent in Rio de Janeiro",
-      description: "Find apartments and houses for rent in Rio.",
+      title: t.rio,
+      description: t.rioDesc,
       image:
         "https://images.unsplash.com/photo-1700677866588-95226be09b39?auto=format&fit=crop&w=800&q=80",
-      cta: "Explore Rio Rentals",
+      cta: t.rioCTA,
       onPress: () =>
         router.push({
           pathname: "/Explore",
@@ -103,8 +107,8 @@ export default function HomeScreen() {
       keyboardShouldPersistTaps="handled"
       contentInsetAdjustmentBehavior="never"
       enableOnAndroid={true}
-      extraScrollHeight={100} // small buffer when keyboard opens
-      extraHeight={75} // overall scroll offset
+      extraScrollHeight={100}
+      extraHeight={75}
       keyboardOpeningTime={0}
       contentContainerStyle={[
         styles.container,
@@ -119,14 +123,14 @@ export default function HomeScreen() {
         value={mode}
         onValueChange={(val) => setMode(val as "search" | "announce")}
         buttons={[
-          { value: "search", label: "Search Property", icon: "magnify" },
-          { value: "announce", label: "Announce Property", icon: "bullhorn" },
+          { value: "search", label: t.searchProperty, icon: "magnify" },
+          { value: "announce", label: t.announceProperty, icon: "bullhorn" },
         ]}
       />
 
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Title
-          title={mode === "search" ? "Search Properties" : "Announce Property"}
+          title={mode === "search" ? t.searchProperties : t.announceProperty}
         />
         <Card.Content>
           {mode === "search" ? (
@@ -135,8 +139,8 @@ export default function HomeScreen() {
                 value={subMode}
                 onValueChange={(val) => setSubMode(val as "rent" | "buy")}
                 buttons={[
-                  { value: "rent", label: "Rent", icon: "key-outline" },
-                  { value: "buy", label: "Buy", icon: "cash-multiple" },
+                  { value: "rent", label: t.rent, icon: "key-outline" },
+                  { value: "buy", label: t.buy, icon: "cash-multiple" },
                 ]}
               />
               <PropertyForm
@@ -152,10 +156,10 @@ export default function HomeScreen() {
                   setSubMode(val as "announce" | "calculate")
                 }
                 buttons={[
-                  { value: "announce", label: "Announce", icon: "bullhorn" },
+                  { value: "announce", label: t.announce, icon: "bullhorn" },
                   {
                     value: "calculate",
-                    label: "Calculate",
+                    label: t.calculate,
                     icon: "calculator",
                   },
                 ]}
@@ -175,6 +179,6 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, padding: 16 },
-  heroWrapper: { marginBottom: 24 }, // ✅ spacing after hero
+  heroWrapper: { marginBottom: 24 },
   card: { marginTop: 16 },
 });

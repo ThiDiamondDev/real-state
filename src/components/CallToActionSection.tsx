@@ -1,23 +1,26 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
+import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Button, useTheme } from "react-native-paper";
 
 export default function CallToActionSection() {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.primary }]}>
       <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-        Ready to find your dream property?
+        {t.ctaTitle}
       </Text>
       <Text style={[styles.description, { color: theme.colors.onPrimary }]}>
-        Browse thousands of listings and connect with trusted agents today.
+        {t.ctaDescription}
       </Text>
       <Button
         mode="contained"
         style={styles.button}
         textColor={theme.colors.onPrimary}
       >
-        Get Started
+        {t.ctaButton}
       </Button>
     </View>
   );

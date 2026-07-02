@@ -1,3 +1,4 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
 import { mockProperties } from "@/data/mockProperties";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
@@ -18,6 +19,7 @@ const { width } = Dimensions.get("window");
 
 export default function PropertyDetailScreen() {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
   const { id } = useLocalSearchParams<{ id: string }>();
   const property = mockProperties.find((p) => p.id === id);
 
@@ -32,11 +34,23 @@ export default function PropertyDetailScreen() {
       <View
         style={[styles.container, { backgroundColor: theme.colors.background }]}
       >
-        <Text style={styles.notFound}>Property not found.</Text>
+        <Text style={styles.notFound}>{t.propertyNotFound}</Text>
       </View>
     );
   }
-  navigation.setOptions({ title: property.title });
+
+  // ✅ Build localized title
+  const translatedType =
+    property.type === "apartment"
+      ? t.apartmentLabel
+      : property.type === "house"
+        ? t.houseLabel
+        : property.type === "terrain"
+          ? t.terrainLabel
+          : property.type;
+  const localizedTitle = `${translatedType} ${t.inLabel} ${property.city}`;
+
+  navigation.setOptions({ title: localizedTitle });
 
   // Load favorite state
   React.useEffect(() => {
@@ -56,11 +70,11 @@ export default function PropertyDetailScreen() {
     let newFav = false;
     if (favorites.includes(property.id)) {
       favorites = favorites.filter((fid) => fid !== property.id);
-      setSnackbarMessage("Removed from favorites");
+      setSnackbarMessage(t.removedFromFavorites);
       newFav = false;
     } else {
       favorites.push(property.id);
-      setSnackbarMessage("Added to favorites");
+      setSnackbarMessage(t.addedToFavorites);
       newFav = true;
     }
 
@@ -73,7 +87,7 @@ export default function PropertyDetailScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      {/* ✅ Image carousel */}
+      {/* Image carousel */}
       <ScrollView
         horizontal
         pagingEnabled
@@ -114,12 +128,12 @@ export default function PropertyDetailScreen() {
         >
           <MaterialCommunityIcons
             name={property.rentOrBuy === "rent" ? "key" : "home"}
-            size={18}
+            size={28}
             color={theme.colors.onPrimary}
             style={{ marginRight: 4 }}
           />
           <Text style={[styles.badgeText, { color: theme.colors.onPrimary }]}>
-            {property.rentOrBuy === "rent" ? "For Rent" : "For Sale"}
+            {property.rentOrBuy === "rent" ? t.forRent : t.forSale}
           </Text>
         </View>
         <TouchableOpacity onPress={toggleFavorite} style={styles.heartButton}>
@@ -139,7 +153,7 @@ export default function PropertyDetailScreen() {
         ]}
       >
         <Text style={[styles.title, { color: theme.colors.onSurface }]}>
-          {property.title}
+          {localizedTitle}
         </Text>
         <Text
           style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}
@@ -157,7 +171,7 @@ export default function PropertyDetailScreen() {
               size={32}
               color={theme.colors.primary}
             />
-            <Text style={styles.label}>Price</Text>
+            <Text style={styles.label}>{t.priceLabel}</Text>
             <Text style={styles.value}>
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",
@@ -171,7 +185,7 @@ export default function PropertyDetailScreen() {
               size={32}
               color={theme.colors.primary}
             />
-            <Text style={styles.label}>Rooms</Text>
+            <Text style={styles.label}>{t.roomsLabel}</Text>
             <Text style={styles.value}>{property.rooms}</Text>
           </View>
           <View style={styles.gridItem}>
@@ -180,7 +194,7 @@ export default function PropertyDetailScreen() {
               size={32}
               color={theme.colors.primary}
             />
-            <Text style={styles.label}>Bathrooms</Text>
+            <Text style={styles.label}>{t.bathroomsLabel}</Text>
             <Text style={styles.value}>{property.bathrooms}</Text>
           </View>
           <View style={styles.gridItem}>
@@ -189,7 +203,7 @@ export default function PropertyDetailScreen() {
               size={32}
               color={theme.colors.primary}
             />
-            <Text style={styles.label}>Car Spaces</Text>
+            <Text style={styles.label}>{t.carSpacesLabel}</Text>
             <Text style={styles.value}>{property.carSpaces}</Text>
           </View>
           <View style={styles.gridItem}>
@@ -198,9 +212,9 @@ export default function PropertyDetailScreen() {
               size={32}
               color={theme.colors.primary}
             />
-            <Text style={styles.label}>Pets</Text>
+            <Text style={styles.label}>{t.petsLabel}</Text>
             <Text style={styles.value}>
-              {property.petsAllowed ? "Allowed" : "Not allowed"}
+              {property.petsAllowed ? t.allowedLabel : t.notAllowedLabel}
             </Text>
           </View>
           <View style={styles.gridItem}>
@@ -209,9 +223,9 @@ export default function PropertyDetailScreen() {
               size={32}
               color={theme.colors.primary}
             />
-            <Text style={styles.label}>Near Metro</Text>
+            <Text style={styles.label}>{t.nearMetroLabel}</Text>
             <Text style={styles.value}>
-              {property.nearMetro ? "Yes" : "No"}
+              {property.nearMetro ? t.yesLabel : t.noLabel}
             </Text>
           </View>
         </View>
@@ -231,7 +245,7 @@ export default function PropertyDetailScreen() {
             color={theme.colors.primary}
           />
           <Text style={styles.detailText}>
-            {property.address || "Address not available"}
+            {property.address || t.addressNotAvailable}
           </Text>
         </View>
         <Button
@@ -240,21 +254,23 @@ export default function PropertyDetailScreen() {
           style={styles.button}
           onPress={() => {
             if (property.address) {
-              const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address)}`;
+              const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                property.address,
+              )}`;
               Linking.openURL(url);
             }
           }}
         >
-          See on Maps
+          {t.seeOnMapsButton}
         </Button>
       </View>
 
       {/* Description */}
       <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
         <Text style={styles.description}>
-          This {property.type} is located in {property.district},{" "}
-          {property.city}. Perfect for families or individuals looking for
-          comfort and convenience.
+          {t.propertyDescriptionPrefix} {translatedType.toLowerCase()}{" "}
+          {t.inLabel} {property.district}, {property.city}.{" "}
+          {t.propertyDescriptionSuffix}
         </Text>
       </View>
 
@@ -266,10 +282,10 @@ export default function PropertyDetailScreen() {
         ]}
       >
         <Button mode="contained" icon="phone" style={styles.button}>
-          Call Agent
+          {t.callAgentButton}
         </Button>
         <Button mode="outlined" icon="email" style={styles.button}>
-          Send Message
+          {t.sendMessageButton}
         </Button>
       </View>
 
@@ -287,7 +303,6 @@ export default function PropertyDetailScreen() {
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   image: { width, height: 250 },
@@ -321,7 +336,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: 20,
     fontWeight: "700",
   },
   heartButton: { padding: 4 },

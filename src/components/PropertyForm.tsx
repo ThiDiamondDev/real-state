@@ -1,3 +1,4 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
 import * as React from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Menu, Portal, TextInput, useTheme } from "react-native-paper";
@@ -15,6 +16,7 @@ interface PropertyFormProps {
 
 export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
 
   const [cityMenu, setCityMenu] = React.useState(false);
   const [city, setCity] = React.useState("");
@@ -34,7 +36,6 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
 
   const handleSubmit = () => {
     const filters = { type, city, district, rooms, value };
-    console.log("Search with:", filters);
     if (onSearch) {
       onSearch(filters);
     }
@@ -45,7 +46,7 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
       {/* City Dropdown */}
       <View>
         <TextInput
-          label="City"
+          label={t.cityLabel}
           value={city}
           left={<TextInput.Icon icon="city" />}
           editable
@@ -77,8 +78,8 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
 
       {/* District input */}
       <TextInput
-        label="District"
-        placeholder="Enter district"
+        label={t.districtLabel}
+        placeholder={t.districtPlaceholder}
         left={<TextInput.Icon icon="map" />}
         value={district}
         onChangeText={setDistrict}
@@ -90,7 +91,7 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
       {/* Value Dropdown */}
       <View>
         <TextInput
-          label={type === "rent" ? "Max Rent (R$)" : "Max Price (R$)"}
+          label={type === "rent" ? t.maxRentLabel : t.maxPriceLabel}
           value={formattedValue || value}
           left={<TextInput.Icon icon="currency-usd" />}
           editable
@@ -126,7 +127,7 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
       {/* Rooms Dropdown */}
       <View>
         <TextInput
-          label="Rooms"
+          label={t.roomsLabel}
           value={rooms}
           left={<TextInput.Icon icon="bed" />}
           editable
@@ -158,7 +159,7 @@ export default function PropertyForm({ type, onSearch }: PropertyFormProps) {
 
       {/* Submit button */}
       <Button mode="contained" style={styles.button} onPress={handleSubmit}>
-        Search
+        {t.searchButton}
       </Button>
     </View>
   );

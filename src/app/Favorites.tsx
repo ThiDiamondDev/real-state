@@ -1,3 +1,4 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
 import * as React from "react";
@@ -14,6 +15,8 @@ import { mockProperties, Property } from "../data/mockProperties";
 
 export default function FavoritesScreen() {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
+
   const [favorites, setFavorites] = React.useState<Property[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -54,7 +57,7 @@ export default function FavoritesScreen() {
         <Text
           style={[styles.loadingText, { color: theme.colors.onBackground }]}
         >
-          Loading favorites...
+          {t.loadingFavorites}
         </Text>
       </View>
     );
@@ -65,16 +68,15 @@ export default function FavoritesScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <Text style={[styles.title, { color: theme.colors.primary }]}>
-        Favorites
+        {t.favoritesTitle}
       </Text>
       <Text style={[styles.description, { color: theme.colors.onBackground }]}>
-        Your saved properties are listed below. Pull down to refresh if you’ve
-        made changes.
+        {t.favoritesDescription}
       </Text>
 
       {favorites.length === 0 ? (
         <Text style={[styles.message, { color: theme.colors.onBackground }]}>
-          No favorites yet
+          {t.noFavorites}
         </Text>
       ) : (
         <FlatList
@@ -111,11 +113,6 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-  },
-  spinnerBox: {
-    padding: 80, // makes the loading UI feel bigger
-    borderRadius: 16,
     alignItems: "center",
   },
   loadingText: {

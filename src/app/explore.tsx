@@ -1,3 +1,4 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
 import * as React from "react";
@@ -16,6 +17,7 @@ import { mockProperties, Property } from "../data/mockProperties";
 
 export default function ExploreScreen() {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
   const rawParams = useLocalSearchParams();
 
   const initialFilters: Filters = {
@@ -57,7 +59,6 @@ export default function ExploreScreen() {
     });
   };
 
-  // ✅ Initialize results directly with filtered list
   const [results, setResults] = React.useState<
     (Property & { isFavorite?: boolean })[]
   >(() => {
@@ -86,11 +87,10 @@ export default function ExploreScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await applyFavorites(results); // refresh current list
+    await applyFavorites(results);
     setRefreshing(false);
   };
 
-  // ✅ Re-filter whenever params change
   React.useEffect(() => {
     const run = async () => {
       const stored = await AsyncStorage.getItem("favorites");
@@ -107,7 +107,7 @@ export default function ExploreScreen() {
     };
 
     run();
-  }, [JSON.stringify(rawParams)]); // depend on params
+  }, [JSON.stringify(rawParams)]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -122,7 +122,7 @@ export default function ExploreScreen() {
           <Text
             style={[styles.loadingText, { color: theme.colors.onBackground }]}
           >
-            Filtering properties...
+            {t.filteringProperties}
           </Text>
         </View>
       )}
@@ -154,15 +154,15 @@ export default function ExploreScreen() {
         ListHeaderComponent={
           <KeyboardAwareScrollView contentContainerStyle={styles.formContainer}>
             <Text style={[styles.title, { color: theme.colors.primary }]}>
-              Explore Properties
+              {t.exploreProperties}
             </Text>
             <Text
               style={[styles.description, { color: theme.colors.onBackground }]}
             >
-              Use the filters below to refine your search.
+              {t.exploreDescription}
             </Text>
             <FilterForm
-              key={JSON.stringify(initialFilters)} // ensures pre-population
+              key={JSON.stringify(initialFilters)}
               onSearch={handleSearch}
               initialFilters={initialFilters}
             />

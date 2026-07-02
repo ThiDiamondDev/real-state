@@ -1,34 +1,38 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
+import * as React from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 
 export default function AnnounceForm() {
+  const { t } = React.useContext(LanguageContext);
+
   return (
     <View style={styles.form}>
       <TextInput
-        label="Address"
-        placeholder="Enter address"
+        label={t.addressLabel}
+        placeholder={t.addressPlaceholder}
         left={<TextInput.Icon icon="home" />}
       />
       <TextInput
-        label="Name"
-        placeholder="Your name"
+        label={t.nameLabel}
+        placeholder={t.namePlaceholder}
         left={<TextInput.Icon icon="account" />}
       />
       <View style={{ flexDirection: "row", gap: 8 }}>
         <TextInput
           style={{ flex: 1 }}
-          label="Country Code"
-          placeholder="+55"
+          label={t.countryCodeLabel}
+          placeholder={t.countryCodePlaceholder}
           left={<TextInput.Icon icon="phone" />}
         />
         <TextInput
           style={{ flex: 2 }}
-          label="Phone"
-          placeholder="Enter phone number"
+          label={t.phoneLabel}
+          placeholder={t.phonePlaceholder}
         />
       </View>
       <Button mode="contained" style={styles.button}>
-        Start Announcing
+        {t.startAnnouncing}
       </Button>
     </View>
   );

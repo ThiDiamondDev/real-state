@@ -1,29 +1,32 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
+import * as React from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useTheme } from "react-native-paper";
 
-const slides = [
-  {
-    title: "Family Comfort",
-    description: "Spacious homes designed for family living.",
-    image:
-      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    title: "Urban Lifestyle",
-    description: "Modern apartments close to everything.",
-    image:
-      "https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    title: "Investment Terrain",
-    description: "Secure land investments for the future.",
-    image:
-      "https://images.unsplash.com/photo-1594220862488-117b78382514?auto=format&fit=crop&w=600&q=80",
-  },
-];
-
 export default function InfoSlides() {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
+
+  const slides = [
+    {
+      title: t.familyComfortTitle,
+      description: t.familyComfortDesc,
+      image:
+        "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=600&q=80",
+    },
+    {
+      title: t.urbanLifestyleTitle,
+      description: t.urbanLifestyleDesc,
+      image:
+        "https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=600&q=80",
+    },
+    {
+      title: t.investmentTerrainTitle,
+      description: t.investmentTerrainDesc,
+      image:
+        "https://images.unsplash.com/photo-1594220862488-117b78382514?auto=format&fit=crop&w=600&q=80",
+    },
+  ];
 
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>

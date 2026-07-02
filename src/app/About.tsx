@@ -1,3 +1,5 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
+import * as React from "react";
 import { StyleSheet, Text } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Button, Card, TextInput, useTheme } from "react-native-paper";
@@ -8,83 +10,77 @@ import InfoSlides from "../components/InfoSlides";
 
 export default function AboutScreen() {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
 
   const slides: HeroSlide[] = [
     {
-      title: "Our Mission",
-      description: "Making property search simple, transparent, and enjoyable.",
+      title: t.missionTitle,
+      description: t.missionDesc,
       image:
         "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
-      cta: "Learn More",
+      cta: t.missionCTA,
       onPress: () => {},
     },
     {
-      title: "Our Vision",
-      description:
-        "Empowering people to find their dream home with confidence.",
+      title: t.visionTitle,
+      description: t.visionDesc,
       image:
         "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
-      cta: "Explore Vision",
+      cta: t.visionCTA,
       onPress: () => {},
     },
     {
-      title: "Our Values",
-      description:
-        "Trust, innovation, and customer focus drive everything we do.",
+      title: t.valuesTitle,
+      description: t.valuesDesc,
       image:
         "https://images.unsplash.com/photo-1594220862488-117b78382514?auto=format&fit=crop&w=1200&q=80",
-      cta: "Discover Values",
+      cta: t.valuesCTA,
       onPress: () => {},
     },
   ];
 
   const peopleSlides: HeroSlide[] = [
     {
-      title: "Ana — Designer",
-      description:
-        "Ana crafts intuitive interfaces and ensures every detail feels elegant.",
+      title: t.anaTitle,
+      description: t.anaDesc,
       image:
         "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=400&q=80",
-      cta: "Meet Ana",
+      cta: t.anaCTA,
       onPress: () => {},
     },
     {
-      title: "Carlos — Developer",
-      description:
-        "Carlos builds robust code and brings innovative features to life.",
+      title: t.carlosTitle,
+      description: t.carlosDesc,
       image:
         "https://images.unsplash.com/photo-1603415526960-f7e0328f63b1?auto=format&fit=crop&w=400&q=80",
-      cta: "Meet Carlos",
+      cta: t.carlosCTA,
       onPress: () => {},
     },
     {
-      title: "Mariana — Specialist",
-      description:
-        "Mariana connects technology with market expertise to guide users.",
+      title: t.marianaTitle,
+      description: t.marianaDesc,
       image:
         "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=400&q=80",
-      cta: "Meet Mariana",
+      cta: t.marianaCTA,
       onPress: () => {},
     },
   ];
 
   const testimonialSlides: HeroSlide[] = [
     {
-      title: "Maria",
-      description:
-        "“This platform made finding my apartment effortless!”\nMaria found her dream apartment in São Paulo within days.",
+      title: t.mariaTitle,
+      description: t.mariaDesc,
       image:
         "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
-      cta: "Read More",
+      cta: t.readMore,
       onPress: () => {},
     },
     {
-      title: "João",
-      description:
-        "“I compared options quickly and closed a deal in days.”\nJoão used our comparison tools to secure a great deal.",
+      title: t.joaoTitle,
+      description: t.joaoDesc,
       image:
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
-      cta: "Read More",
+      cta: t.readMore,
       onPress: () => {},
     },
   ];
@@ -105,15 +101,12 @@ export default function AboutScreen() {
       {/* Who we are */}
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Title
-          title="Who We Are"
+          title={t.whoWeAreTitle}
           titleStyle={{ color: theme.colors.onSurface }}
         />
         <Card.Content>
           <Text style={[styles.text, { color: theme.colors.onSurface }]}>
-            We are a passionate team dedicated to transforming the way people
-            search, compare, and secure properties. Our platform blends modern
-            technology with human‑centered design to make every step of the
-            journey smooth and inspiring.
+            {t.whoWeAreDesc}
           </Text>
         </Card.Content>
       </Card>
@@ -127,7 +120,7 @@ export default function AboutScreen() {
       {/* People involved carousel */}
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Title
-          title="People Involved"
+          title={t.peopleInvolvedTitle}
           titleStyle={{ color: theme.colors.onSurface }}
         />
         <Card.Content>
@@ -138,7 +131,7 @@ export default function AboutScreen() {
       {/* Testimonials carousel */}
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Title
-          title="Testimonials"
+          title={t.testimonialsTitle}
           titleStyle={{ color: theme.colors.onSurface }}
         />
         <Card.Content>
@@ -149,7 +142,7 @@ export default function AboutScreen() {
       {/* Address with icon */}
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Title
-          title="Our Address"
+          title={t.addressTitle}
           titleStyle={{ color: theme.colors.onSurface }}
         />
         <Card.Content style={{ flexDirection: "row", alignItems: "center" }}>
@@ -160,7 +153,7 @@ export default function AboutScreen() {
             style={{ marginRight: 8 }}
           />
           <Text style={[styles.text, { color: theme.colors.onSurface }]}>
-            Av. Paulista, 1000 — São Paulo, SP, Brazil
+            {t.addressValue}
           </Text>
         </Card.Content>
       </Card>
@@ -168,19 +161,19 @@ export default function AboutScreen() {
       {/* Contact Form with icons */}
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Title
-          title="Contact Us"
+          title={t.contactUsTitle}
           titleStyle={{ color: theme.colors.onSurface }}
         />
         <Card.Content>
           <TextInput
-            label="Name"
+            label={t.nameLabel}
             mode="outlined"
             style={styles.input}
             left={<TextInput.Icon icon="account" />}
             theme={{ colors: { primary: theme.colors.primary } }}
           />
           <TextInput
-            label="Email"
+            label={t.emailLabel}
             mode="outlined"
             style={styles.input}
             keyboardType="email-address"
@@ -188,7 +181,7 @@ export default function AboutScreen() {
             theme={{ colors: { primary: theme.colors.primary } }}
           />
           <TextInput
-            label="Message"
+            label={t.messageLabel}
             mode="outlined"
             style={styles.input}
             multiline
@@ -201,7 +194,7 @@ export default function AboutScreen() {
             style={styles.button}
             onPress={() => console.log("Message sent")}
           >
-            Send Message
+            {t.sendMessage}
           </Button>
         </Card.Content>
       </Card>

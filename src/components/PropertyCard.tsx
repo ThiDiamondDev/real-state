@@ -1,5 +1,6 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LinearGradient } from "expo-linear-gradient"; // ✅ gradient overlay
+import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import * as React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -15,6 +16,18 @@ export default function PropertyCard({
   onFavoriteChange?: (id: string, fav: boolean) => void;
 }) {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
+  // ✅ Build localized title here
+  const translatedType =
+    property.type === "apartment"
+      ? t.apartmentLabel
+      : property.type === "house"
+        ? t.houseLabel
+        : property.type === "terrain"
+          ? t.terrainLabel
+          : property.type;
+
+  const localizedTitle = `${translatedType} ${t.inLabel} ${property.city}`;
   const [internalFavorite, setInternalFavorite] = React.useState(false);
   const [snackbarVisible, setSnackbarVisible] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
@@ -40,11 +53,11 @@ export default function PropertyCard({
     let newFav = false;
     if (favorites.includes(property.id)) {
       favorites = favorites.filter((id) => id !== property.id);
-      setSnackbarMessage("Removed from favorites");
+      setSnackbarMessage(t.removedFromFavorites);
       newFav = false;
     } else {
       favorites.push(property.id);
-      setSnackbarMessage("Added to favorites");
+      setSnackbarMessage(t.addedToFavorites);
       newFav = true;
     }
 
@@ -65,7 +78,6 @@ export default function PropertyCard({
             style={styles.cover}
             source={{ uri: property.images[0] }}
           />
-          {/* ✅ Rent/Sale badge overlay with gradient */}
           <LinearGradient
             colors={["rgba(0, 0, 0, 0.92)", "rgba(0, 0, 0, 0.6)"]}
             style={styles.badgeContainer}
@@ -77,7 +89,7 @@ export default function PropertyCard({
               style={{ marginRight: 4 }}
             />
             <Text style={styles.badgeText}>
-              {property.rentOrBuy === "rent" ? "For Rent" : "For Sale"}
+              {property.rentOrBuy === "rent" ? t.forRent : t.forSale}
             </Text>
           </LinearGradient>
         </View>
@@ -91,7 +103,7 @@ export default function PropertyCard({
         >
           <View style={styles.headerText}>
             <Text style={[styles.title, { color: theme.colors.onSurface }]}>
-              {property.title}
+              {localizedTitle}
             </Text>
             <Text
               style={[
@@ -122,7 +134,7 @@ export default function PropertyCard({
                 size={32}
                 color={theme.colors.primary}
               />
-              <Text style={styles.label}>Price</Text>
+              <Text style={styles.label}>{t.priceLabel}</Text>
               <Text style={styles.value}>
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
@@ -136,7 +148,7 @@ export default function PropertyCard({
                 size={32}
                 color={theme.colors.primary}
               />
-              <Text style={styles.label}>Rooms</Text>
+              <Text style={styles.label}>{t.roomsLabel}</Text>
               <Text style={styles.value}>{property.rooms}</Text>
             </View>
             <View style={styles.gridItem}>
@@ -145,7 +157,7 @@ export default function PropertyCard({
                 size={32}
                 color={theme.colors.primary}
               />
-              <Text style={styles.label}>Bathrooms</Text>
+              <Text style={styles.label}>{t.bathroomsLabel}</Text>
               <Text style={styles.value}>{property.bathrooms}</Text>
             </View>
             <View style={styles.gridItem}>
@@ -154,7 +166,7 @@ export default function PropertyCard({
                 size={32}
                 color={theme.colors.primary}
               />
-              <Text style={styles.label}>Car Spaces</Text>
+              <Text style={styles.label}>{t.carSpacesLabel}</Text>
               <Text style={styles.value}>{property.carSpaces}</Text>
             </View>
             <View style={styles.gridItem}>
@@ -163,9 +175,9 @@ export default function PropertyCard({
                 size={32}
                 color={theme.colors.primary}
               />
-              <Text style={styles.label}>Pets</Text>
+              <Text style={styles.label}>{t.petsLabel}</Text>
               <Text style={styles.value}>
-                {property.petsAllowed ? "Allowed" : "Not allowed"}
+                {property.petsAllowed ? t.allowedLabel : t.notAllowedLabel}
               </Text>
             </View>
             <View style={styles.gridItem}>
@@ -174,9 +186,9 @@ export default function PropertyCard({
                 size={32}
                 color={theme.colors.primary}
               />
-              <Text style={styles.label}>Near Metro</Text>
+              <Text style={styles.label}>{t.nearMetroLabel}</Text>
               <Text style={styles.value}>
-                {property.nearMetro ? "Yes" : "No"}
+                {property.nearMetro ? t.yesLabel : t.noLabel}
               </Text>
             </View>
           </View>
@@ -187,7 +199,7 @@ export default function PropertyCard({
             href={{ pathname: "/property/[id]", params: { id: property.id } }}
             asChild
           >
-            <Button mode="contained">View Details</Button>
+            <Button mode="contained">{t.viewDetailsButton}</Button>
           </Link>
         </Card.Actions>
       </Card>
@@ -210,22 +222,13 @@ export default function PropertyCard({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    marginBottom: 16,
-    marginHorizontal: 12,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    borderRadius: 12,
-  },
+  card: { marginBottom: 16, marginHorizontal: 12, borderRadius: 12 },
   cover: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
   },
   headerText: { flex: 1 },
   title: { fontSize: 18, fontWeight: "bold" },
@@ -237,12 +240,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 12,
   },
-  gridItem: {
-    width: "30%",
-    marginBottom: 12,
-    alignItems: "center",
-  },
-  label: { fontSize: 12, color: "#666", marginTop: 4 },
+  gridItem: { width: "30%", marginBottom: 12, alignItems: "center" },
+  label: { fontSize: 12, marginTop: 4 },
   value: { fontSize: 14, fontWeight: "600", marginTop: 2, textAlign: "center" },
   snackbar: {
     borderRadius: 360,
@@ -262,9 +261,5 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
-  badgeText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
-  },
+  badgeText: { fontSize: 18, fontWeight: "700", color: "#fff" },
 });

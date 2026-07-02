@@ -1,37 +1,40 @@
+import { LanguageContext } from "@/contexts/LanguageContext";
+import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Card, useTheme } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-const steps = [
-  {
-    icon: "magnify",
-    title: "Search",
-    description: "Find properties that match your lifestyle.",
-  },
-  {
-    icon: "compare",
-    title: "Compare",
-    description: "Evaluate options side by side with ease.",
-  },
-  {
-    icon: "phone",
-    title: "Contact",
-    description: "Reach out directly to owners or agents.",
-  },
-  {
-    icon: "check-circle",
-    title: "Close Deal",
-    description: "Seal the agreement and move in confidently.",
-  },
-];
-
 export default function FunnelSection() {
   const theme = useTheme();
+  const { t } = React.useContext(LanguageContext);
+
+  const steps = [
+    {
+      icon: "magnify",
+      title: t.searchStepTitle,
+      description: t.searchStepDesc,
+    },
+    {
+      icon: "compare",
+      title: t.compareStepTitle,
+      description: t.compareStepDesc,
+    },
+    {
+      icon: "phone",
+      title: t.contactStepTitle,
+      description: t.contactStepDesc,
+    },
+    {
+      icon: "check-circle",
+      title: t.closeDealStepTitle,
+      description: t.closeDealStepDesc,
+    },
+  ];
 
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { color: theme.colors.onBackground }]}>
-        Your Journey
+        {t.journeyTitle}
       </Text>
       {steps.map((s, i) => (
         <Card
@@ -41,7 +44,7 @@ export default function FunnelSection() {
           <View style={styles.cardContent}>
             <MaterialCommunityIcons
               name={s.icon}
-              size={48} // bigger icons
+              size={48}
               color={theme.colors.primary}
               style={styles.icon}
             />
