@@ -1,8 +1,8 @@
 import { LanguageContext } from "@/contexts/LanguageContext";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Card, useTheme } from "react-native-paper";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function FunnelSection() {
   const theme = useTheme();

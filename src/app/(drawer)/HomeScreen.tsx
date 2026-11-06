@@ -4,13 +4,13 @@ import * as React from "react";
 import { StyleSheet, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Card, SegmentedButtons, useTheme } from "react-native-paper";
-import AnnounceForm from "../components/AnnounceForm";
-import CalculateForm from "../components/CalculateForm";
-import CallToActionSection from "../components/CallToActionSection";
-import FunnelSection from "../components/FunnelSection";
-import HeroCarousel, { HeroSlide } from "../components/HeroCarousel";
-import InfoSlides from "../components/InfoSlides";
-import PropertyForm from "../components/PropertyForm";
+import AnnounceForm from "../../components/AnnounceForm";
+import CalculateForm from "../../components/CalculateForm";
+import CallToActionSection from "../../components/CallToActionSection";
+import FunnelSection from "../../components/FunnelSection";
+import HeroCarousel, { HeroSlide } from "../../components/HeroCarousel";
+import InfoSlides from "../../components/InfoSlides";
+import PropertyForm from "../../components/PropertyForm";
 
 export default function HomeScreen() {
   // ✅ Consume context correctly
@@ -36,7 +36,10 @@ export default function HomeScreen() {
         "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
       cta: t.modernCTA,
       onPress: () =>
-        router.push({ pathname: "/Explore", params: { type: "house" } }),
+        router.push({
+          pathname: "/(drawer)/Explore",
+          params: { type: "house" },
+        }),
     },
     {
       title: t.cityApartment,
@@ -45,7 +48,10 @@ export default function HomeScreen() {
         "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80",
       cta: t.cityCTA,
       onPress: () =>
-        router.push({ pathname: "/Explore", params: { type: "apartment" } }),
+        router.push({
+          pathname: "/(drawer)/Explore",
+          params: { type: "apartment" },
+        }),
     },
     {
       title: t.terrain,
@@ -54,7 +60,10 @@ export default function HomeScreen() {
         "https://images.unsplash.com/photo-1594220862488-117b78382514?auto=format&fit=crop&w=800&q=80",
       cta: t.terrainCTA,
       onPress: () =>
-        router.push({ pathname: "/Explore", params: { type: "terrain" } }),
+        router.push({
+          pathname: "/(drawer)/Explore",
+          params: { type: "terrain" },
+        }),
     },
     {
       title: t.petFriendly,
@@ -64,7 +73,7 @@ export default function HomeScreen() {
       cta: t.petCTA,
       onPress: () =>
         router.push({
-          pathname: "/Explore",
+          pathname: "/(drawer)/Explore",
           params: { type: "house", rentOrBuy: "rent", petsAllowed: "true" },
         }),
     },
@@ -76,7 +85,7 @@ export default function HomeScreen() {
       cta: t.saoPauloCTA,
       onPress: () =>
         router.push({
-          pathname: "/Explore",
+          pathname: "/(drawer)/Explore",
           params: { city: "São Paulo", rentOrBuy: "rent" },
         }),
     },
@@ -88,7 +97,7 @@ export default function HomeScreen() {
       cta: t.rioCTA,
       onPress: () =>
         router.push({
-          pathname: "/Explore",
+          pathname: "/(drawer)/Explore",
           params: { city: "Rio de Janeiro", rentOrBuy: "rent" },
         }),
     },
@@ -97,7 +106,7 @@ export default function HomeScreen() {
   // Handler for search form submit
   const handleSearch = (filters: any) => {
     router.push({
-      pathname: "/Explore",
+      pathname: "/(drawer)/Explore",
       params: { ...filters, rentOrBuy: subMode },
     });
   };

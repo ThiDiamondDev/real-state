@@ -3,15 +3,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
 import * as React from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  View,
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    View,
 } from "react-native";
 import { Text, useTheme } from "react-native-paper";
-import PropertyCard from "../components/PropertyCard";
-import { mockProperties, Property } from "../data/mockProperties";
+import PropertyCard from "../../components/PropertyCard";
+import { mockProperties, Property } from "../../data/mockProperties";
 
 export default function FavoritesScreen() {
   const theme = useTheme();

@@ -1,7 +1,8 @@
 import { LanguageContext } from "@/contexts/LanguageContext";
 import { mockProperties } from "@/data/mockProperties";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import * as React from "react";
 import {
   Dimensions,
@@ -13,7 +14,6 @@ import {
   View,
 } from "react-native";
 import { Button, Snackbar, Text, useTheme } from "react-native-paper";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 const { width } = Dimensions.get("window");
 
@@ -21,14 +21,21 @@ export default function PropertyDetailScreen() {
   const theme = useTheme();
   const { t } = React.useContext(LanguageContext);
   const { id } = useLocalSearchParams<{ id: string }>();
-  const property = mockProperties.find((p) => p.id === id);
+  // Use String() mapping to make sure number 1 matches string "1" safely
+  const property = mockProperties.find((p) => String(p.id) === String(id));
+  if (!property) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Property not found (ID: {id})</Text>
+      </View>
+    );
+  }
 
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [favorite, setFavorite] = React.useState(false);
   const [snackbarVisible, setSnackbarVisible] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
 
-  const navigation = require("expo-router").useNavigation();
   if (!property) {
     return (
       <View
@@ -49,8 +56,6 @@ export default function PropertyDetailScreen() {
           ? t.terrainLabel
           : property.type;
   const localizedTitle = `${translatedType} ${t.inLabel} ${property.city}`;
-
-  navigation.setOptions({ title: localizedTitle });
 
   // Load favorite state
   React.useEffect(() => {
@@ -87,6 +92,8 @@ export default function PropertyDetailScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
+      <Stack.Screen options={{ title: localizedTitle }} />
+
       {/* Image carousel */}
       <ScrollView
         horizontal

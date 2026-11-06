@@ -1,11 +1,11 @@
 import { LanguageContext } from "@/contexts/LanguageContext";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import * as React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Card, Snackbar, Text, useTheme } from "react-native-paper";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Property } from "../data/mockProperties";
 
 export default function PropertyCard({
@@ -195,10 +195,7 @@ export default function PropertyCard({
         </Card.Content>
 
         <Card.Actions>
-          <Link
-            href={{ pathname: "/property/[id]", params: { id: property.id } }}
-            asChild
-          >
+          <Link href={`/property/${property.id}`} asChild>
             <Button mode="contained">{t.viewDetailsButton}</Button>
           </Link>
         </Card.Actions>

@@ -1,9 +1,9 @@
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useLocalSearchParams } from "expo-router";
 import * as React from "react";
 import { Dimensions, Image, ScrollView, StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { mockProperties } from "../data/mockProperties";
+import { mockProperties } from "../../data/mockProperties";
 
 const { width } = Dimensions.get("window");
 

@@ -1,12 +1,12 @@
 import { LanguageContext } from "@/contexts/LanguageContext";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as React from "react";
 import { StyleSheet, Text } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Button, Card, TextInput, useTheme } from "react-native-paper";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import FunnelSection from "../components/FunnelSection";
-import HeroCarousel, { HeroSlide } from "../components/HeroCarousel";
-import InfoSlides from "../components/InfoSlides";
+import FunnelSection from "../../components/FunnelSection";
+import HeroCarousel, { HeroSlide } from "../../components/HeroCarousel";
+import InfoSlides from "../../components/InfoSlides";
 
 export default function AboutScreen() {
   const theme = useTheme();
